@@ -1,6 +1,7 @@
 package hr.riteh.rwt.ticketing.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import hr.riteh.rwt.ticketing.dto.SuccessDto;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -17,9 +18,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 @Component
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
@@ -33,31 +33,31 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
-        Map<String, Object> errorDetails = new HashMap<>();
 
-        try {
-            if (jwtUtil.resolveToken(request) == null ) {
-                filterChain.doFilter(request, response);
+        if (!request.getRequestURI().equals("/api/auth/login")) {
+            try {
+                String resolvedToken = jwtUtil.resolveToken(request);
+
+                Claims claims = jwtUtil.resolveClaims(resolvedToken);
+
+                if (claims != null && jwtUtil.validateClaims(claims)) {
+                    String userID = claims.getSubject();
+                    Authentication authentication = new UsernamePasswordAuthenticationToken(userID, "", new ArrayList<>());
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
+
+            } catch (Exception e) {
+                SuccessDto successDto = new SuccessDto();
+                successDto.setSuccessFalse(e.getMessage());
+                response.setStatus(HttpStatus.FORBIDDEN.value());
+                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+                mapper.writeValue(response.getWriter(), successDto);
                 return;
             }
-
-            Claims claims = jwtUtil.resolveClaims(request);
-
-            if(claims != null && jwtUtil.validateClaims(claims)){
-                String userID = claims.getSubject();
-                Authentication authentication = new UsernamePasswordAuthenticationToken(userID, "", new ArrayList<>());
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            }
-
-        }catch (Exception e){
-            errorDetails.put("message", "Authentication Error");
-            errorDetails.put("details",e.getMessage());
-            response.setStatus(HttpStatus.FORBIDDEN.value());
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-
-            mapper.writeValue(response.getWriter(), errorDetails);
-
         }
+
         filterChain.doFilter(request, response);
     }
+
 }
