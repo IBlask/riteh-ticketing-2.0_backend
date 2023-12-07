@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 
 @Component
@@ -34,7 +33,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-        if (!request.getRequestURI().equals("/api/auth/login")) {
+        if (uriIsProtected(request)) {
             try {
                 String resolvedToken = jwtUtil.resolveToken(request);
 
@@ -58,6 +57,15 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+
+    private boolean uriIsProtected (@NonNull HttpServletRequest request) {
+        ArrayList<String> publicURIs = new ArrayList<>();
+        publicURIs.add("/api/h2-console/");
+        publicURIs.add("/api/auth/login/");
+
+        return publicURIs.stream().noneMatch(request.getRequestURI().concat("/")::contains);
     }
 
 }
