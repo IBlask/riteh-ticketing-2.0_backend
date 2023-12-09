@@ -75,6 +75,7 @@ CREATE TABLE IF NOT EXISTS Ticket (
     sluzba_id int NOT NULL,
     voditelj_user_id varchar(64) NOT NULL,
     prostorija varchar(8) NOT NULL,
+    institucija_id int NOT NULL,
     prijavitelj_user_id varchar(64) NOT NULL,
     stvarni_prijavitelj_user_id varchar(64),
     kategorija_id int NOT NULL,
@@ -88,6 +89,7 @@ CREATE TABLE IF NOT EXISTS Ticket (
     FOREIGN KEY (parent_id) REFERENCES Ticket(id),
     FOREIGN KEY (sluzba_id) REFERENCES Sluzba(id),
     FOREIGN KEY (voditelj_user_id) REFERENCES Users(user_id),
+    FOREIGN KEY (prostorija, institucija_id) REFERENCES Prostorija(oznaka, institucija_id),
     FOREIGN KEY (prijavitelj_user_id) REFERENCES Users(user_id),
     FOREIGN KEY (stvarni_prijavitelj_user_id) REFERENCES Users(user_id),
     FOREIGN KEY (kategorija_id) REFERENCES Kategorija(id)
