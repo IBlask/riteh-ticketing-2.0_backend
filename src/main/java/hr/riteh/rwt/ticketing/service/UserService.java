@@ -25,21 +25,21 @@ public class UserService {
         //provjera ispravnosti zahtjeva
         if (loginDto.isIncorrectlyFormatted()) {
             successDto.setSuccessFalse("Neispravno formatiran zahtjev!");
-            return ResponseEntity.ok(successDto);
+            return ResponseEntity.badRequest().body(successDto);
         }
 
         //provjera prikupljenih podataka
         if (loginDto.getUserID().isBlank() && loginDto.getPassword().isEmpty()) {
             successDto.setSuccessFalse("Unesite korisničko ime i lozinku!");
-            return ResponseEntity.ok(successDto);
+            return ResponseEntity.badRequest().body(successDto);
         }
         else if (loginDto.getUserID().isBlank()) {
             successDto.setSuccessFalse("Unesite korisničko ime!");
-            return ResponseEntity.ok(successDto);
+            return ResponseEntity.badRequest().body(successDto);
         }
         else if (loginDto.getPassword().isEmpty()) {
             successDto.setSuccessFalse("Unesite lozinku!");
-            return ResponseEntity.ok(successDto);
+            return ResponseEntity.badRequest().body(successDto);
         }
 
         //provjera tocnosti podataka
@@ -48,6 +48,7 @@ public class UserService {
         if ((authUser != null) && new BCryptPasswordEncoder().matches(loginDto.getPassword(), authUser.getPassword())) {
             successDto.setSuccessTrue();
             return ResponseEntity.ok()
+                    .header("Access-Control-Expose-Headers","Authorization")
                     .header(HttpHeaders.AUTHORIZATION, jwtUtil.createToken(authUser))
                     .body(successDto);
         }
