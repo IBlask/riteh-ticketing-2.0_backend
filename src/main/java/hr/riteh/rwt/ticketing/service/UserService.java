@@ -5,11 +5,19 @@ import hr.riteh.rwt.ticketing.dto.LoginDto;
 import hr.riteh.rwt.ticketing.dto.SuccessDto;
 import hr.riteh.rwt.ticketing.entity.User;
 import hr.riteh.rwt.ticketing.repository.UserRepository;
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 @Service
 public class UserService {
@@ -55,6 +63,23 @@ public class UserService {
 
         successDto.setSuccessFalse("Neispravno korisničko ime ili lozinka!");
         return ResponseEntity.ok().body(successDto);
+    }
+
+
+
+    @Value("${user-profile-photo.path}")
+    private String dirPath;
+    @Value("${user-profile-photo.default-photo}")
+    private String defaultPhoto;
+
+    public ResponseEntity<byte[]> getProfilePhoto(HttpServletRequest httpServletRequest) throws IOException {
+        Claims claims = jwtUtil.resolveClaims(jwtUtil.resolveToken(httpServletRequest));
+
+        try {
+            return ResponseEntity.ok(IOUtils.toByteArray(new File(dirPath + claims.getSubject() + ".jpg").toURI()));
+        } catch (FileNotFoundException e) {
+            return ResponseEntity.ok(IOUtils.toByteArray(new File(dirPath + defaultPhoto).toURI()));
+        }
     }
 
 }
