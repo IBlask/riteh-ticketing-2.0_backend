@@ -5,10 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
@@ -20,7 +17,7 @@ public class UserController {
     @Autowired
     UserService userService;
 
-    @GetMapping(value = "/get-profile-photo", produces = MediaType.IMAGE_JPEG_VALUE)
+    @PostMapping(value = "/get-profile-photo", produces = MediaType.IMAGE_JPEG_VALUE)
     public ResponseEntity<byte[]> getProfilePhoto(HttpServletRequest httpServletRequest) {
         try {
             return userService.getProfilePhoto(httpServletRequest);
