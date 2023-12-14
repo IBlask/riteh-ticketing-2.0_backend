@@ -1,5 +1,6 @@
 package hr.riteh.rwt.ticketing.controller;
 
+import hr.riteh.rwt.ticketing.dto.UserDto;
 import hr.riteh.rwt.ticketing.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @CrossOrigin
@@ -24,6 +26,12 @@ public class UserController {
         } catch (IOException e) {
             return ResponseEntity.internalServerError().build();
         }
+    }
+
+
+    @PostMapping(value = "/get-users", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<UserDto>> getUsers(HttpServletRequest httpServletRequest) {
+        return userService.getUsers(httpServletRequest);
     }
 
 }

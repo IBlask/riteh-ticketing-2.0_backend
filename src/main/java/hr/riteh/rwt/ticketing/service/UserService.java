@@ -3,6 +3,7 @@ package hr.riteh.rwt.ticketing.service;
 import hr.riteh.rwt.ticketing.auth.JwtUtil;
 import hr.riteh.rwt.ticketing.dto.LoginDto;
 import hr.riteh.rwt.ticketing.dto.SuccessDto;
+import hr.riteh.rwt.ticketing.dto.UserDto;
 import hr.riteh.rwt.ticketing.entity.User;
 import hr.riteh.rwt.ticketing.repository.UserRepository;
 import io.jsonwebtoken.Claims;
@@ -18,6 +19,8 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class UserService {
@@ -80,6 +83,23 @@ public class UserService {
         } catch (FileNotFoundException e) {
             return ResponseEntity.ok(IOUtils.toByteArray(new File(dirPath + defaultPhoto).toURI()));
         }
+    }
+
+
+
+    public ResponseEntity<List<UserDto>> getUsers(HttpServletRequest httpServletRequest) {
+        List<UserDto> returnList = new ArrayList<>();
+
+        String userID = jwtUtil.resolveClaims(jwtUtil.resolveToken(httpServletRequest)).getSubject();
+        List<User> usersList = userRepository.findAll();
+
+        for (User user : usersList) {
+            if (!user.getUserID().equals(userID)) {
+                returnList.add(new UserDto(user.getUserID(), user.getFirstName(), user.getLastName()));
+            }
+        }
+
+        return ResponseEntity.ok(returnList);
     }
 
 }
