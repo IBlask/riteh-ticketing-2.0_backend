@@ -14,10 +14,15 @@ public class Category {
     @Column(name = "name")
     private String name;
     @Column(name = "parent_id")
-    private int parentID;
+    private Integer parentID;
     @Column(name = "sluzba_id")
-    private int sluzbaID;
+    private int departmentID;
     @Column(name = "active")
     private boolean active;
+
+
+    public String getName() {
+        return name;
+    }
 
 }

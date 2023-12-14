@@ -35,6 +35,14 @@ public class User {
         return lastName;
     }
 
+    public int getInstitutionId() {
+        return institutionId;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
     public String getPassword() {
         return password;
     }

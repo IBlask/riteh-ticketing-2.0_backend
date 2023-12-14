@@ -14,6 +14,11 @@ public class Department {
     @Column(name = "name")
     private String name;
     @Column(name = "institucija_id")
-    private int institucijaID;
+    private int institutionID;
+
+
+    public int getId() {
+        return id;
+    }
 
 }

@@ -12,6 +12,6 @@ public class Room {
     @Column(name = "oznaka")
     private String label;
     @Column(name = "institucija_id")
-    private int institucijaID;
+    private int institutionID;
 
 }

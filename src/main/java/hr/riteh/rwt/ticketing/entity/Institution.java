@@ -16,6 +16,6 @@ public class Institution {
     @Column(name = "address")
     private String address;
     @Column(name = "contactEmail")
-    private String contectEmail;
+    private String contactEmail;
 
 }

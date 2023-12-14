@@ -7,7 +7,6 @@ import jakarta.persistence.Table;
 
 import java.sql.Date;
 import java.sql.Time;
-import java.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name = "Ticket")
@@ -16,23 +15,23 @@ public class Ticket {
     @Column(name = "id")
     private long id;
     @Column(name = "parent_id")
-    private long parentID;
+    private Long parentID;
     @Column(name = "description")
     private String description;
     @Column(name = "sluzba_id")
-    private int sluzbaID;
+    private int departmentID;
     @Column(name = "voditelj_user_id")
-    private String voditeljID;
+    private String departmentLeaderID;
     @Column(name = "prostorija")
-    private String prostorija;
+    private String room;
     @Column(name = "institucija_id")
-    private int institucijaID;
+    private int institutionID;
     @Column(name = "prijavitelj_user_id")
-    private String prijaviteljID;
+    private String applicantID;
     @Column(name = "stvarni_prijavitelj_user_id")
-    private String stvarniPrijaviteljID;
+    private String realApplicantID;
     @Column(name = "kategorija_id")
-    private String kategorijaID;
+    private String categoryID;
     @Column(name = "created_at")
     private Date createdAt;     // TODO DateTimeFormatter
     @Column(name = "status")

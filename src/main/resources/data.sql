@@ -1,6 +1,11 @@
 INSERT INTO Institucija(id, name, address, contact_email) VALUES (1, 'Tehnički fakultet u Rijeci', 'Vukovarska 58, Rijeka', 'rwt.ticketing@gmail.com');
 
+INSERT INTO Sluzba (id, name, institucija_id) VALUES (1, '_D__Računalni centar', 1);
+INSERT INTO Sluzba (id, name, institucija_id) VALUES (2, '_D__Tehnička služba', 1);
 
+INSERT INTO Kategorija(id, name, sluzba_id, parent_id, active) VALUES (1, '_RC_Kvar PC-a__n/a', 1, null, 0);
+INSERT INTO Kategorija(id, name, sluzba_id, parent_id, active) VALUES (2, '_RC_Kvar PC-a', 1, null, 1);
+INSERT INTO Kategorija(id, name, sluzba_id, parent_id, active) VALUES (3, '_TS_Kvar projektora', 2, null, 1);
 
 
 -- *****KORISNICI*****
