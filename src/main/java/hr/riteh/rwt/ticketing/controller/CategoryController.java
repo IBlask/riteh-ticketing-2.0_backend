@@ -1,5 +1,6 @@
 package hr.riteh.rwt.ticketing.controller;
 
+import hr.riteh.rwt.ticketing.dto.CategoryDto;
 import hr.riteh.rwt.ticketing.service.CategoryService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ public class CategoryController {
     CategoryService categoryService;
 
     @PostMapping(value = "/get-all", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<String>> getAll(HttpServletRequest httpServletRequest) {
+    public ResponseEntity<List<CategoryDto>> getAll(HttpServletRequest httpServletRequest) {
         return categoryService.getAll(httpServletRequest);
     }
 

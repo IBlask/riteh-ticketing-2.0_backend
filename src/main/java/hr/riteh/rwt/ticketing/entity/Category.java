@@ -21,6 +21,10 @@ public class Category {
     private boolean active;
 
 
+    public int getId() {
+        return id;
+    }
+
     public String getName() {
         return name;
     }
