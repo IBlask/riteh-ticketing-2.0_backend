@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS Kategorija (
 
 CREATE TABLE IF NOT EXISTS Ticket (
     id long NOT NULL AUTO_INCREMENT,
-    parent_id long NOT NULL,
+    parent_id long,
     description varchar(255) NOT NULL,
     sluzba_id int NOT NULL,
     voditelj_user_id varchar(64) NOT NULL,
@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS Ticket (
     prijavitelj_user_id varchar(64) NOT NULL,
     stvarni_prijavitelj_user_id varchar(64),
     kategorija_id int NOT NULL,
-    created_at datetime NOT NULL,
+    created_at timestamp NOT NULL,
     status varchar(64) NOT NULL,
     priority tinyint,
     deadline date,

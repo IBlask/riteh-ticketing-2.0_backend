@@ -21,4 +21,7 @@ public class Department {
         return id;
     }
 
+    public int getInstitutionID() {
+        return institutionID;
+    }
 }

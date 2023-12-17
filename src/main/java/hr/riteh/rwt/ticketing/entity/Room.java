@@ -14,4 +14,8 @@ public class Room {
     @Column(name = "institucija_id")
     private int institutionID;
 
+
+    public int getInstitutionID() {
+        return institutionID;
+    }
 }

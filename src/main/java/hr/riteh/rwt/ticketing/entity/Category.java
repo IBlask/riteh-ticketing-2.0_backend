@@ -29,4 +29,7 @@ public class Category {
         return name;
     }
 
+    public int getDepartmentID() {
+        return departmentID;
+    }
 }

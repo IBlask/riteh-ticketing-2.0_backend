@@ -7,6 +7,9 @@ INSERT INTO Kategorija(id, name, sluzba_id, parent_id, active) VALUES (1, '_RC_K
 INSERT INTO Kategorija(id, name, sluzba_id, parent_id, active) VALUES (2, '_RC_Kvar PC-a', 1, null, 1);
 INSERT INTO Kategorija(id, name, sluzba_id, parent_id, active) VALUES (3, '_TS_Kvar projektora', 2, null, 1);
 
+INSERT INTO Prostorija(oznaka, institucija_id) VALUES ('I5', 1);
+INSERT INTO Prostorija(oznaka, institucija_id) VALUES ('I8', 1);
+
 
 -- *****KORISNICI*****
 -- sve lozinke su "pass"
@@ -30,3 +33,6 @@ INSERT INTO users(user_id, firstName, lastName, institucija_id, email, password)
 
 -- *****SUPER-VODITELJ - INSTITUCIJA*****
 INSERT INTO Super_voditelj(user_id, institucija_id, active) VALUES ('svd@riteh.hr', 1, 1);
+
+-- *****VODITELJ*****
+INSERT INTO Zaposlenik_sluzbe(user_id, sluzba_id, role, active) VALUES ('vd@riteh.hr', 1, 'v', 1);
