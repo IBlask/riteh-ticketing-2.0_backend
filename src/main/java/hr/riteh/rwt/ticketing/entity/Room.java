@@ -15,6 +15,10 @@ public class Room {
     private int institutionID;
 
 
+    public String getLabel() {
+        return label;
+    }
+
     public int getInstitutionID() {
         return institutionID;
     }
