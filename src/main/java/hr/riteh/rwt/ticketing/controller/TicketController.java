@@ -1,5 +1,6 @@
 package hr.riteh.rwt.ticketing.controller;
 
+import hr.riteh.rwt.ticketing.dto.GetAllTicketsRequestDto;
 import hr.riteh.rwt.ticketing.dto.NewTicketDto;
 import hr.riteh.rwt.ticketing.dto.SuccessDto;
 import hr.riteh.rwt.ticketing.service.TicketService;
@@ -20,6 +21,11 @@ public class TicketController {
     @PostMapping(value = "/new", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SuccessDto> newTicket (HttpServletRequest httpServletRequest, @RequestBody NewTicketDto newTicketDto) {
         return ticketService.newTicket(httpServletRequest, newTicketDto);
+    }
+
+    @PostMapping(value = "/get-all", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity getAllTickets (HttpServletRequest httpServletRequest, @RequestBody GetAllTicketsRequestDto requestDto) {
+        return ticketService.getAllTickets(httpServletRequest, requestDto);
     }
 
 }

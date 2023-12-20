@@ -32,7 +32,7 @@ public class Ticket {
     @Column(name = "kategorija_id")
     private int categoryID;
     @Column(name = "created_at", columnDefinition = "TIMESTAMP")
-    private LocalDateTime createdAt;     // TODO DateTimeFormatter
+    private LocalDateTime createdAt;
     @Column(name = "status")
     private String status;
     @Column(name = "priority")
@@ -45,12 +45,25 @@ public class Ticket {
     private Time realFixTime;
 
 
+    public Ticket() {
+        super();
+    }
+
     public Ticket(NewTicketDto newTicketDto) {
         this.parentID = newTicketDto.getParentID();
         this.description = newTicketDto.getDescription();
         this.room = newTicketDto.getRoom();
         this.categoryID = newTicketDto.getCategoryID();
         this.realApplicantID = newTicketDto.getRealApplicantID();
+    }
+
+
+    public long getId() {
+        return id;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
 

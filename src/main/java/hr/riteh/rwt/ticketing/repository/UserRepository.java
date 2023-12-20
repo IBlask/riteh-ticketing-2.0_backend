@@ -10,4 +10,5 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     @Query(value = "SELECT user_id FROM zaposlenik_sluzbe WHERE sluzba_id = :departmentID AND role = 'v' AND active = true", nativeQuery = true)
     String getDepartmentLeaderByDepartmentID(@Param("departmentID") int departmentID);
+
 }

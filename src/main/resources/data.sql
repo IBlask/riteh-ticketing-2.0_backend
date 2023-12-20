@@ -36,3 +36,6 @@ INSERT INTO Super_voditelj(user_id, institucija_id, active) VALUES ('svd@riteh.h
 
 -- *****VODITELJ*****
 INSERT INTO Zaposlenik_sluzbe(user_id, sluzba_id, role, active) VALUES ('vd@riteh.hr', 1, 'v', 1);
+
+-- *****AGENT*****
+INSERT INTO Zaposlenik_sluzbe(user_id, sluzba_id, role, active) VALUES ('ag@riteh.hr', 1, 'a', 1);

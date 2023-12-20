@@ -21,6 +21,10 @@ public class Department {
         return id;
     }
 
+    public String getName() {
+        return name;
+    }
+
     public int getInstitutionID() {
         return institutionID;
     }
