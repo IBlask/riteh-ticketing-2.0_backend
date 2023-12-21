@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
+    Ticket findById(long ticketID);
 
     //MY TICKETS
     @Query(value = "SELECT * FROM Ticket WHERE prijavitelj_user_id = :userID OR stvarni_prijavitelj_user_id = :userID", nativeQuery = true)
@@ -43,5 +44,11 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     List<Ticket> findAllByDepartmentLeaderIDAndStatus(String departmentLeaderID, String status);
 
     List<Ticket> findAllByIdInAndStatus(List<Long> ticketsIDs, String status);
+
+
+
+    //FIND AGENTS ASSIGNED TO TICKET
+    @Query(value = "SELECT agent_user_id FROM Agent_Ticket WHERE ticket_id = :ticketID", nativeQuery = true)
+    List<String> findAllAgentsAssignedToTicket(@Param("ticketID") long ticketID);
 
 }

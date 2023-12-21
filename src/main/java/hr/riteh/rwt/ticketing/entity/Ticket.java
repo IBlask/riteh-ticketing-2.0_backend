@@ -66,6 +66,45 @@ public class Ticket {
         return description;
     }
 
+    public Long getParentID() {
+        return parentID;
+    }
+
+    public int getDepartmentID() {
+        return departmentID;
+    }
+
+    public String getDepartmentLeaderID() {
+        return departmentLeaderID;
+    }
+
+    public String getRoom() {
+        return room;
+    }
+
+    public int getInstitutionID() {
+        return institutionID;
+    }
+
+    public String getApplicantID() {
+        return applicantID;
+    }
+
+    public String getRealApplicantID() {
+        return realApplicantID;
+    }
+
+    public int getCategoryID() {
+        return categoryID;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public String getStatus() {
+        return status;
+    }
 
     public void setId(long id) {
         this.id = id;

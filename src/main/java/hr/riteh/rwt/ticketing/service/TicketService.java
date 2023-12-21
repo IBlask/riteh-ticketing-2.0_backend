@@ -254,4 +254,50 @@ public class TicketService {
         return supportedStatusesDisplay.get(supportedStatuses.indexOf(status));
     }
 
+
+
+
+
+    public ResponseEntity getTicket (GetTicketRequestDto requestDto) {
+        //verify DTO
+        Long ticketID = requestDto.getTicketID();
+        SuccessDto successDto = new SuccessDto();
+        if (ticketID == null) {
+            successDto.setSuccessFalse("Molimo unesite identifikacijski broj ticketa!");
+            return ResponseEntity.badRequest().body(successDto);
+        }
+        else if (!ticketRepository.existsById(ticketID)) {
+            successDto.setSuccessFalse("Ne postoji ticket s tim identifikacijskim brojem!");
+            return ResponseEntity.badRequest().body(successDto);
+        }
+
+        Ticket ticket = ticketRepository.findById(ticketID.longValue());
+        List<String> agents = ticketRepository.findAllAgentsAssignedToTicket(ticketID);
+
+        GetTicketResponseDto responseDto = new GetTicketResponseDto();
+        responseDto.setTicketID(ticket.getId());
+        responseDto.setDescription(ticket.getDescription());
+        responseDto.setRoom(ticket.getRoom());
+        responseDto.setCategory(categoryRepository.findById(ticket.getCategoryID()).getName());
+        responseDto.setCreatedAt(ticket.getCreatedAt());
+        responseDto.setStatus(ticket.getStatus());
+        responseDto.setApplicantID(ticket.getApplicantID());
+        responseDto.setRealApplicantID(ticket.getRealApplicantID());
+        responseDto.setAgents(agents);
+        responseDto.setDepartment(departmentRepository.findById(ticket.getDepartmentID()).getName());
+        responseDto.setDepartmentLeaderID(ticket.getDepartmentLeaderID());
+
+        User applicant = userRepository.findByUserID(ticket.getApplicantID());
+        responseDto.setApplicantFullName(applicant.getFirstName() + " " + applicant.getLastName());
+
+        if (ticket.getRealApplicantID() != null) {
+            User realApplicant = userRepository.findByUserID(ticket.getRealApplicantID());
+            responseDto.setRealApplicantFullName(realApplicant.getFirstName() + " " + realApplicant.getLastName());
+        }
+
+        User departmentLeader = userRepository.findByUserID(ticket.getDepartmentLeaderID());
+        responseDto.setDepartmentLeaderFullName(departmentLeader.getFirstName() + " " + departmentLeader.getLastName());
+
+        return ResponseEntity.ok(responseDto);
+    }
 }
