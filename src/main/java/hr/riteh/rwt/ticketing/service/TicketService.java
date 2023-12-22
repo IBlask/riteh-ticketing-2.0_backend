@@ -51,7 +51,7 @@ public class TicketService {
         //ENTERING DATA TO THE DATABASE
         Ticket newTicket = new Ticket(newTicketDto);
         newTicket.setDepartmentID(this.department.getId());
-        newTicket.setDepartmentLeaderID(userRepository.getDepartmentLeaderByDepartmentID(department.getId()));
+        newTicket.setDepartmentLeaderID(employeeRepository.findByDepartmentIDAndRoleAndActive(department.getId(), 'v', true).getUserID());
         newTicket.setInstitutionID(institutionID);
         newTicket.setApplicantID(userID);
         newTicket.setCreatedAt(LocalDateTime.now());

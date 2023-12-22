@@ -19,6 +19,10 @@ public class Employee {
     private boolean active;
 
 
+    public String getUserID() {
+        return userID;
+    }
+
     public int getDepartmentID() {
         return departmentID;
     }
