@@ -15,9 +15,7 @@ public class SuccessDto {
 
     public void setSuccessFalse(String description) {
         this.success = false;
-        if (!description.isBlank()) {
-            this.description = description;
-        }
+        this.description = description.isBlank() ? "Dogodila se greška!" : description;
     }
 
 
