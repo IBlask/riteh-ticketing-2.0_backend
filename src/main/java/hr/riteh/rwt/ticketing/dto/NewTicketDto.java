@@ -2,6 +2,7 @@ package hr.riteh.rwt.ticketing.dto;
 
 public class NewTicketDto {
     private Long parentID;
+    private String title;
     private String description;
     private String room;
     private String realApplicantID;
@@ -10,6 +11,10 @@ public class NewTicketDto {
 
     public Long getParentID() {
         return parentID;
+    }
+
+    public String getTitle() {
+        return title;
     }
 
     public String getDescription() {

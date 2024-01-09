@@ -9,6 +9,7 @@ import java.util.List;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class GetTicketResponseDto {
     private long ticketID;
+    private String title;
     private String description;
     private String room;
     private String category;
@@ -27,6 +28,10 @@ public class GetTicketResponseDto {
 
     public void setTicketID(long ticketID) {
         this.ticketID = ticketID;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public void setDescription(String description) {

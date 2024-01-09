@@ -21,6 +21,7 @@ public class AuthController {
         return userService.login(loginDto);
     }
 
+    // TODO remove
     @PostMapping(value = "/test", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public String test(@RequestHeader(name = "Authorization") String token) {
         return "Hello world!!";

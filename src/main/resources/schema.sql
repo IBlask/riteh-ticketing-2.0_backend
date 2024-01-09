@@ -71,7 +71,8 @@ CREATE TABLE IF NOT EXISTS Kategorija (
 CREATE TABLE IF NOT EXISTS Ticket (
     id long NOT NULL AUTO_INCREMENT,
     parent_id long,
-    description varchar(255) NOT NULL,
+    title varchar(80) NOT NULL,
+    description varchar(255),
     sluzba_id int NOT NULL,
     voditelj_user_id varchar(64) NOT NULL,
     prostorija varchar(8) NOT NULL,

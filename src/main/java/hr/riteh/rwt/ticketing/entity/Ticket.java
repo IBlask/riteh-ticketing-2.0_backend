@@ -17,6 +17,8 @@ public class Ticket {
     private Long parentID;
     @Column(name = "description")
     private String description;
+    @Column(name = "title")
+    private String title;
     @Column(name = "sluzba_id")
     private int departmentID;
     @Column(name = "voditelj_user_id")
@@ -51,6 +53,7 @@ public class Ticket {
 
     public Ticket(NewTicketDto newTicketDto) {
         this.parentID = newTicketDto.getParentID();
+        this.title = newTicketDto.getTitle();
         this.description = newTicketDto.getDescription();
         this.room = newTicketDto.getRoom();
         this.categoryID = newTicketDto.getCategoryID();
@@ -60,6 +63,10 @@ public class Ticket {
 
     public long getId() {
         return id;
+    }
+
+    public String getTitle() {
+        return title;
     }
 
     public String getDescription() {

@@ -1,6 +1,5 @@
 package hr.riteh.rwt.ticketing.controller;
 
-import hr.riteh.rwt.ticketing.dto.GetAllTicketsRequestDto;
 import hr.riteh.rwt.ticketing.dto.GetTicketRequestDto;
 import hr.riteh.rwt.ticketing.dto.NewTicketDto;
 import hr.riteh.rwt.ticketing.dto.SuccessDto;
@@ -24,14 +23,19 @@ public class TicketController {
         return ticketService.newTicket(httpServletRequest, newTicketDto);
     }
 
-    @PostMapping(value = "/get-all", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity getAllTickets (HttpServletRequest httpServletRequest, @RequestBody GetAllTicketsRequestDto requestDto) {
-        return ticketService.getAllTickets(httpServletRequest, requestDto);
-    }
-
     @PostMapping(value = "/get-ticket", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getTicket (@RequestBody GetTicketRequestDto requestDto) {
         return ticketService.getTicket(requestDto);
+    }
+
+    @PostMapping(value = "/get-active-tickets", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity getActiveTickets (HttpServletRequest httpServletRequest) {
+        return ticketService.getActiveTickets(httpServletRequest);
+    }
+
+    @PostMapping(value = "/get-closed-tickets", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity getClosedTickets (HttpServletRequest httpServletRequest) {
+        return ticketService.getClosedTickets(httpServletRequest);
     }
 
 }
