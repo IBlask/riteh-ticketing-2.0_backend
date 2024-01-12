@@ -1,6 +1,6 @@
 package hr.riteh.rwt.ticketing.dto;
 
-public class LoginDto {
+public class LoginRequestDto {
     private String userID;
     private String password;
 

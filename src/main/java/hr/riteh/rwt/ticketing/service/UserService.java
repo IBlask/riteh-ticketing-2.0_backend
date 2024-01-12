@@ -1,10 +1,12 @@
 package hr.riteh.rwt.ticketing.service;
 
 import hr.riteh.rwt.ticketing.auth.JwtUtil;
-import hr.riteh.rwt.ticketing.dto.LoginDto;
-import hr.riteh.rwt.ticketing.dto.SuccessDto;
+import hr.riteh.rwt.ticketing.dto.LoginRequestDto;
+import hr.riteh.rwt.ticketing.dto.LoginResponseDto;
 import hr.riteh.rwt.ticketing.dto.UserDto;
+import hr.riteh.rwt.ticketing.entity.Employee;
 import hr.riteh.rwt.ticketing.entity.User;
+import hr.riteh.rwt.ticketing.repository.EmployeeRepository;
 import hr.riteh.rwt.ticketing.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +23,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -29,43 +32,55 @@ public class UserService {
     JwtUtil jwtUtil;
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    EmployeeRepository employeeRepository;
 
-    public ResponseEntity<SuccessDto> login(LoginDto loginDto) {
-        SuccessDto successDto = new SuccessDto();
+    public ResponseEntity<LoginResponseDto> login(LoginRequestDto loginRequestDto) {
+        LoginResponseDto loginResponseDto = new LoginResponseDto();
 
         //provjera ispravnosti zahtjeva
-        if (loginDto.isIncorrectlyFormatted()) {
-            successDto.setSuccessFalse("Neispravno formatiran zahtjev!");
-            return ResponseEntity.badRequest().body(successDto);
+        if (loginRequestDto.isIncorrectlyFormatted()) {
+            loginResponseDto.setSuccessFalse("Neispravno formatiran zahtjev!");
+            return ResponseEntity.badRequest().body(loginResponseDto);
         }
 
         //provjera prikupljenih podataka
-        if (loginDto.getUserID().isBlank() && loginDto.getPassword().isEmpty()) {
-            successDto.setSuccessFalse("Unesite korisničko ime i lozinku!");
-            return ResponseEntity.badRequest().body(successDto);
+        if (loginRequestDto.getUserID().isBlank() && loginRequestDto.getPassword().isEmpty()) {
+            loginResponseDto.setSuccessFalse("Unesite korisničko ime i lozinku!");
+            return ResponseEntity.badRequest().body(loginResponseDto);
         }
-        else if (loginDto.getUserID().isBlank()) {
-            successDto.setSuccessFalse("Unesite korisničko ime!");
-            return ResponseEntity.badRequest().body(successDto);
+        else if (loginRequestDto.getUserID().isBlank()) {
+            loginResponseDto.setSuccessFalse("Unesite korisničko ime!");
+            return ResponseEntity.badRequest().body(loginResponseDto);
         }
-        else if (loginDto.getPassword().isEmpty()) {
-            successDto.setSuccessFalse("Unesite lozinku!");
-            return ResponseEntity.badRequest().body(successDto);
+        else if (loginRequestDto.getPassword().isEmpty()) {
+            loginResponseDto.setSuccessFalse("Unesite lozinku!");
+            return ResponseEntity.badRequest().body(loginResponseDto);
         }
 
         //provjera tocnosti podataka
-        User authUser = userRepository.findByUserID(loginDto.getUserID());
+        User authUser = userRepository.findByUserID(loginRequestDto.getUserID());
 
-        if ((authUser != null) && new BCryptPasswordEncoder().matches(loginDto.getPassword(), authUser.getPassword())) {
-            successDto.setSuccessTrue();
+        if ((authUser != null) && new BCryptPasswordEncoder().matches(loginRequestDto.getPassword(), authUser.getPassword())) {
+            Optional<Employee> employee = employeeRepository.findById(loginRequestDto.getUserID());
+            if (employee.isPresent()) {
+                loginResponseDto.setSuccessTrue(employee.get().getRole() == 'v' ? "voditelj" : "agent");
+            }
+            else if (employeeRepository.institutionLeaderExistsByUserID(loginRequestDto.getUserID()).isPresent()) {
+                loginResponseDto.setSuccessTrue("super-voditelj");
+            }
+            else {
+                loginResponseDto.setSuccessTrue("user");
+            }
+
             return ResponseEntity.ok()
                     .header("Access-Control-Expose-Headers","Authorization")
                     .header(HttpHeaders.AUTHORIZATION, jwtUtil.createToken(authUser))
-                    .body(successDto);
+                    .body(loginResponseDto);
         }
 
-        successDto.setSuccessFalse("Neispravno korisničko ime ili lozinka!");
-        return ResponseEntity.ok().body(successDto);
+        loginResponseDto.setSuccessFalse("Neispravno korisničko ime ili lozinka!");
+        return ResponseEntity.ok().body(loginResponseDto);
     }
 
 
