@@ -6,12 +6,14 @@ import hr.riteh.rwt.ticketing.entity.*;
 import hr.riteh.rwt.ticketing.repository.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TicketService {
@@ -208,6 +210,38 @@ public class TicketService {
         for (Ticket ticket : tickets) {
             String categoryName = categoryRepository.findById(ticket.getCategoryID()).getName();
             GetUserTicketsDto ticketDto = new GetUserTicketsDto(ticket.getId(), ticket.getTitle(), categoryName, ticket.getCreatedAt());
+            returnList.add(ticketDto);
+        }
+
+        return ResponseEntity.ok(returnList);
+    }
+
+
+
+
+
+    public ResponseEntity getRecentlyOpenedTickets(HttpServletRequest httpServletRequest) {
+        String userID = jwtUtil.resolveClaims(jwtUtil.resolveToken(httpServletRequest)).getSubject();
+        Optional<User> user = userRepository.findById(userID);
+
+        if (user.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        int institutionID = user.get().getInstitutionId();
+
+        List<RecentlyOpenedTicketsDto> returnList = new ArrayList<>();
+        List<Ticket> tickets = ticketRepository.findAllRecentlyOpenedTickets(institutionID, LocalDateTime.now().minusDays(2));
+
+        for (Ticket ticket : tickets) {
+            User applicant = userRepository.findByUserID(ticket.getApplicantID());
+            RecentlyOpenedTicketsDto ticketDto = new RecentlyOpenedTicketsDto(
+                    ticket.getId(),
+                    ticket.getTitle(),
+                    ticket.getRoom(),
+                    ticket.getCreatedAt(),
+                    applicant.getFirstName() + " " + applicant.getLastName() + " " + applicant.getUserID(),
+                    ticket.getStatus());
             returnList.add(ticketDto);
         }
 

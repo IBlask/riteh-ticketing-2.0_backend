@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
@@ -18,5 +19,8 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     @Query(value = "SELECT * FROM Ticket WHERE prijavitelj_user_id = :userID AND status = 'Zaključen'", nativeQuery = true)
     List<Ticket> findAllClosedTicketsByApplicantID(String userID);
+
+    @Query(value = "SELECT * FROM Ticket WHERE (status = 'Otvoren' OR (created_at >= :createdAt AND status NOT IN ('Riješen', 'Zaključen'))) AND institucija_id = :institutionID", nativeQuery = true)
+    List<Ticket> findAllRecentlyOpenedTickets(int institutionID, LocalDateTime createdAt);
 
 }

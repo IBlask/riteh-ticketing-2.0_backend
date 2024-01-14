@@ -23,4 +23,7 @@ public class SuccessDto {
         return success;
     }
 
+    public String getDescription() {
+        return description;
+    }
 }

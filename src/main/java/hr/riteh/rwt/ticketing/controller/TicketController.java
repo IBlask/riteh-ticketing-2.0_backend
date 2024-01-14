@@ -38,4 +38,9 @@ public class TicketController {
         return ticketService.getClosedTickets(httpServletRequest);
     }
 
+    @PostMapping(value = "/get-recently-opened-tickets", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity getRecentlyOpenedTickets(HttpServletRequest httpServletRequest) {
+        return ticketService.getRecentlyOpenedTickets(httpServletRequest);
+    }
+
 }
