@@ -120,6 +120,9 @@ public class TicketService {
                 return successDto;
             }
         }
+        else {
+            newTicketDto.setRealApplicantIDAsNull();
+        }
 
         //verification of the parentID
         if (newTicketDto.getParentID() != null && !ticketRepository.existsById(newTicketDto.getParentID())) {

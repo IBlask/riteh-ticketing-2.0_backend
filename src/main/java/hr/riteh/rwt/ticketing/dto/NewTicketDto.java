@@ -32,4 +32,9 @@ public class NewTicketDto {
     public Integer getCategoryID() {
         return categoryID;
     }
+
+
+    public void setRealApplicantIDAsNull() {
+        this.realApplicantID = null;
+    }
 }
