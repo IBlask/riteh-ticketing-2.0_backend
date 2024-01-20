@@ -24,23 +24,8 @@ public class TicketController {
     }
 
     @PostMapping(value = "/get-ticket", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity getTicket (@RequestBody GetTicketRequestDto requestDto) {
+    public ResponseEntity<Object> getTicket (@RequestBody GetTicketRequestDto requestDto) {
         return ticketService.getTicket(requestDto);
-    }
-
-    @PostMapping(value = "/get-active-tickets", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity getActiveTickets (HttpServletRequest httpServletRequest) {
-        return ticketService.getActiveTickets(httpServletRequest);
-    }
-
-    @PostMapping(value = "/get-closed-tickets", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity getClosedTickets (HttpServletRequest httpServletRequest) {
-        return ticketService.getClosedTickets(httpServletRequest);
-    }
-
-    @PostMapping(value = "/get-recently-opened-tickets", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity getRecentlyOpenedTickets(HttpServletRequest httpServletRequest) {
-        return ticketService.getRecentlyOpenedTickets(httpServletRequest);
     }
 
 }
