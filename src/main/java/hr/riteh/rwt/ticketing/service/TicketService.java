@@ -1,10 +1,8 @@
 package hr.riteh.rwt.ticketing.service;
 
 import hr.riteh.rwt.ticketing.auth.JwtUtil;
-import hr.riteh.rwt.ticketing.dto.GetTicketRequestDto;
-import hr.riteh.rwt.ticketing.dto.GetTicketResponseDto;
-import hr.riteh.rwt.ticketing.dto.NewTicketDto;
-import hr.riteh.rwt.ticketing.dto.SuccessDto;
+import hr.riteh.rwt.ticketing.dao.TicketSummaryDao;
+import hr.riteh.rwt.ticketing.dto.*;
 import hr.riteh.rwt.ticketing.entity.*;
 import hr.riteh.rwt.ticketing.repository.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,7 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class TicketService {
@@ -182,4 +182,57 @@ public class TicketService {
     }
 
 
+
+
+
+    public ResponseEntity<Object> getAll(HttpServletRequest httpServletRequest, int pageNumber) {
+        String userID = jwtUtil.resolveClaims(jwtUtil.resolveToken(httpServletRequest)).getSubject();
+
+        List<TicketSummaryDao> tickets;
+        long numberOfTickets;
+        Optional<Employee> employee = employeeRepository.findById(userID);
+
+        //agent
+        if (employee.isPresent() && employee.get().getRole() == 'a') {
+            tickets = ticketRepository.findAllAgentsTickets(userID, (pageNumber - 1) * 50);
+            numberOfTickets = ticketRepository.countAgentsTickets(userID);
+        }
+
+        //department leader
+        else if (employee.isPresent() && employee.get().getRole() == 'v') {
+            tickets = ticketRepository.findAllDepartmentLeadersTickets(userID, (pageNumber - 1) * 50);
+            numberOfTickets = ticketRepository.countDepartmentLeadersTickets(userID);
+        }
+
+        //institution leader
+        else if (employeeRepository.institutionLeaderExistsByUserID(userID).isPresent()) {
+            tickets = ticketRepository.findAllInstitutionLeadersTickets(userID, (pageNumber - 1) * 50);
+            numberOfTickets = ticketRepository.countInstitutionLeadersTickets(userID);
+        }
+
+        //normal user
+        else {
+            tickets = ticketRepository.findAllUsersTickets(userID, (pageNumber - 1) * 50);
+            numberOfTickets = ticketRepository.countByApplicantID(userID);
+        }
+
+        String[] priorityNames =  {"Nije hitno", "Normalno", "Hitno"};
+        List<GetAllTicketsResponseDto> returnList = new ArrayList<>();
+        for (TicketSummaryDao ticket : tickets) {
+            String categoryName = categoryRepository.findById(ticket.getKategorija_id()).getName();
+            String departmentName = departmentRepository.findById(ticket.getSluzba_id()).getName();
+            String priority = (ticket.getPriority() == null) ? "Nije određeno" : priorityNames[ticket.getPriority()];
+
+            returnList.add(new GetAllTicketsResponseDto(ticket, categoryName, departmentName, priority));
+        }
+
+        long numberOfPages = numberOfTickets / 50;
+        if (numberOfTickets % 50 != 0) numberOfPages++;
+
+        return ResponseEntity.ok()
+                .header("Access-Control-Expose-Headers","numberOfPages, currentPage")
+                .header("numberOfPages", String.valueOf(numberOfPages))
+                .header("currentPage", String.valueOf(pageNumber))
+                .body(returnList);
+    }
 }
