@@ -7,6 +7,7 @@ import hr.riteh.rwt.ticketing.entity.*;
 import hr.riteh.rwt.ticketing.repository.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -185,8 +186,14 @@ public class TicketService {
 
 
 
-    public ResponseEntity<Object> getAll(HttpServletRequest httpServletRequest, int pageNumber) {
+    public ResponseEntity<Object> getAll(HttpServletRequest httpServletRequest, GetAllTicketsRequestDto requestDto, int pageNumber) {
         String userID = jwtUtil.resolveClaims(jwtUtil.resolveToken(httpServletRequest)).getSubject();
+
+        if (pageNumber <= 0) {
+            SuccessDto successDto = new SuccessDto();
+            successDto.setSuccessFalse("Broj stranice mora biti veći od 0!");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(successDto);
+        }
 
         List<TicketSummaryDao> tickets;
         long numberOfTickets;
@@ -194,26 +201,26 @@ public class TicketService {
 
         //agent
         if (employee.isPresent() && employee.get().getRole() == 'a') {
-            tickets = ticketRepository.findAllAgentsTickets(userID, (pageNumber - 1) * 50);
-            numberOfTickets = ticketRepository.countAgentsTickets(userID);
+            tickets = ticketRepository.findAllAgentsTickets(userID, (pageNumber - 1) * 50, requestDto.getStatus(), requestDto.getDepartmentID());
+            numberOfTickets = ticketRepository.countAgentsTickets(userID, requestDto.getStatus(), requestDto.getDepartmentID());
         }
 
         //department leader
         else if (employee.isPresent() && employee.get().getRole() == 'v') {
-            tickets = ticketRepository.findAllDepartmentLeadersTickets(userID, (pageNumber - 1) * 50);
-            numberOfTickets = ticketRepository.countDepartmentLeadersTickets(userID);
+            tickets = ticketRepository.findAllDepartmentLeadersTickets(userID, (pageNumber - 1) * 50, requestDto.getStatus(), requestDto.getDepartmentID());
+            numberOfTickets = ticketRepository.countDepartmentLeadersTickets(userID, requestDto.getStatus(), requestDto.getDepartmentID());
         }
 
         //institution leader
         else if (employeeRepository.institutionLeaderExistsByUserID(userID).isPresent()) {
-            tickets = ticketRepository.findAllInstitutionLeadersTickets(userID, (pageNumber - 1) * 50);
-            numberOfTickets = ticketRepository.countInstitutionLeadersTickets(userID);
+            tickets = ticketRepository.findAllInstitutionLeadersTickets(userID, (pageNumber - 1) * 50, requestDto.getStatus(), requestDto.getDepartmentID());
+            numberOfTickets = ticketRepository.countInstitutionLeadersTickets(userID, requestDto.getStatus(), requestDto.getDepartmentID());
         }
 
         //normal user
         else {
-            tickets = ticketRepository.findAllUsersTickets(userID, (pageNumber - 1) * 50);
-            numberOfTickets = ticketRepository.countByApplicantID(userID);
+            tickets = ticketRepository.findAllUsersTickets(userID, (pageNumber - 1) * 50, requestDto.getStatus(), requestDto.getDepartmentID());
+            numberOfTickets = ticketRepository.countUsersTickets(userID, requestDto.getStatus(), requestDto.getDepartmentID());
         }
 
         String[] priorityNames =  {"Nije hitno", "Normalno", "Hitno"};
@@ -228,6 +235,7 @@ public class TicketService {
 
         long numberOfPages = numberOfTickets / 50;
         if (numberOfTickets % 50 != 0) numberOfPages++;
+        if (numberOfTickets == 0) pageNumber = 0;
 
         return ResponseEntity.ok()
                 .header("Access-Control-Expose-Headers","numberOfPages, currentPage")

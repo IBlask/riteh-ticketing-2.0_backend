@@ -1,5 +1,6 @@
 package hr.riteh.rwt.ticketing.controller;
 
+import hr.riteh.rwt.ticketing.dto.GetAllTicketsRequestDto;
 import hr.riteh.rwt.ticketing.dto.GetTicketRequestDto;
 import hr.riteh.rwt.ticketing.dto.NewTicketDto;
 import hr.riteh.rwt.ticketing.dto.SuccessDto;
@@ -29,8 +30,8 @@ public class TicketController {
     }
 
     @GetMapping(value = {"/get-all", "/get-all/", "/get-all/{pageNumber}"}, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> getAll (HttpServletRequest httpServletRequest, @PathVariable(required = false) Integer pageNumber) {
-        return ticketService.getAll(httpServletRequest, pageNumber == null ? 1 : pageNumber);
+    public ResponseEntity<Object> getAll (HttpServletRequest httpServletRequest, @PathVariable(required = false) Integer pageNumber, @RequestBody GetAllTicketsRequestDto requestDto) {
+        return ticketService.getAll(httpServletRequest, requestDto, pageNumber == null ? 1 : pageNumber);
     }
 
 }
