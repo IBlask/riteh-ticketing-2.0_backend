@@ -29,7 +29,7 @@ public class TicketController {
         return ticketService.getTicket(requestDto);
     }
 
-    @GetMapping(value = {"/get-all", "/get-all/", "/get-all/{pageNumber}"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = {"/get-all", "/get-all/", "/get-all/{pageNumber}"}, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> getAll (HttpServletRequest httpServletRequest, @PathVariable(required = false) Integer pageNumber, @RequestBody GetAllTicketsRequestDto requestDto) {
         return ticketService.getAll(httpServletRequest, requestDto, pageNumber == null ? 1 : pageNumber);
     }
