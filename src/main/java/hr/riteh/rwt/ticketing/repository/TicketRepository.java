@@ -20,45 +20,51 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     @Query(value = "SELECT * FROM Ticket " +
             "WHERE prijavitelj_user_id = :userID " +
             "AND (status = :status OR :status IS NULL) " +
+            "AND (priority = :priority OR :priority IS NULL) " +
             "AND (sluzba_id = :departmentID OR :departmentID IS NULL) " +
             "ORDER BY created_at DESC OFFSET :offset ROWS FETCH NEXT 50 ROWS ONLY", nativeQuery = true)
-    List<TicketSummaryDao> findAllUsersTickets(String userID, int offset, String status, Integer departmentID);
+    List<TicketSummaryDao> findAllUsersTickets(String userID, int offset, String status, Integer priority, Integer departmentID);
 
     @Query(value = "SELECT COUNT(id) FROM Ticket " +
             "WHERE prijavitelj_user_id = :userID " +
             "AND (status = :status OR :status IS NULL) " +
+            "AND (priority = :priority OR :priority IS NULL) " +
             "AND (sluzba_id = :departmentID OR :departmentID IS NULL)", nativeQuery = true)
-    long countUsersTickets(String userID, String status, Integer departmentID);
+    long countUsersTickets(String userID, String status, Integer priority, Integer departmentID);
 
 
 
     @Query(value = "SELECT * FROM Ticket " +
             "WHERE (prijavitelj_user_id = :userID OR id IN (SELECT ticket_id FROM Agent_Ticket WHERE agent_user_id = :userID)) " +
             "AND (status = :status OR :status IS NULL) " +
+            "AND (priority = :priority OR :priority IS NULL) " +
             "AND (sluzba_id = :departmentID OR :departmentID IS NULL) " +
             "ORDER BY created_at DESC OFFSET :offset ROWS FETCH NEXT 50 ROWS ONLY", nativeQuery = true)
-    List<TicketSummaryDao> findAllAgentsTickets(String userID, int offset, String status, Integer departmentID);
+    List<TicketSummaryDao> findAllAgentsTickets(String userID, int offset, String status, Integer priority, Integer departmentID);
 
     @Query(value = "SELECT COUNT(id) FROM Ticket " +
             "WHERE (prijavitelj_user_id = :userID OR id IN (SELECT ticket_id FROM Agent_Ticket WHERE agent_user_id = :userID)) " +
             "AND (status = :status OR :status IS NULL) " +
+            "AND (priority = :priority OR :priority IS NULL) " +
             "AND (sluzba_id = :departmentID OR :departmentID IS NULL)", nativeQuery = true)
-    long countAgentsTickets(String userID, String status, Integer departmentID);
+    long countAgentsTickets(String userID, String status, Integer priority, Integer departmentID);
 
 
 
     @Query(value = "SELECT * FROM Ticket " +
             "WHERE (prijavitelj_user_id = :userID OR voditelj_user_id = :userID) " +
             "AND (status = :status OR :status IS NULL) " +
+            "AND (priority = :priority OR :priority IS NULL) " +
             "AND (sluzba_id = :departmentID OR :departmentID IS NULL) " +
             "ORDER BY created_at DESC OFFSET :offset ROWS FETCH NEXT 50 ROWS ONLY", nativeQuery = true)
-    List<TicketSummaryDao> findAllDepartmentLeadersTickets(String userID, int offset, String status, Integer departmentID);
+    List<TicketSummaryDao> findAllDepartmentLeadersTickets(String userID, int offset, String status, Integer priority, Integer departmentID);
 
     @Query(value = "SELECT COUNT(id) FROM Ticket " +
             "WHERE (prijavitelj_user_id = :userID OR voditelj_user_id = :userID) " +
             "AND (status = :status OR :status IS NULL) " +
+            "AND (priority = :priority OR :priority IS NULL) " +
             "AND (sluzba_id = :departmentID OR :departmentID IS NULL)", nativeQuery = true)
-    long countDepartmentLeadersTickets(String userID, String status, Integer departmentID);
+    long countDepartmentLeadersTickets(String userID, String status, Integer priority, Integer departmentID);
 
 
 
@@ -66,15 +72,17 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
             "WHERE (prijavitelj_user_id = :userID OR institucija_id = " +
                 "(SELECT institucija_id FROM Super_voditelj WHERE user_id = :userID AND active = true)) " +
             "AND (status = :status OR :status IS NULL) " +
+            "AND (priority = :priority OR :priority IS NULL) " +
             "AND (sluzba_id = :departmentID OR :departmentID IS NULL) " +
             "ORDER BY created_at DESC OFFSET :offset ROWS FETCH NEXT 50 ROWS ONLY", nativeQuery = true)
-    List<TicketSummaryDao> findAllInstitutionLeadersTickets(String userID, int offset, String status, Integer departmentID);
+    List<TicketSummaryDao> findAllInstitutionLeadersTickets(String userID, int offset, String status, Integer priority, Integer departmentID);
 
     @Query(value = "SELECT COUNT(id) FROM Ticket " +
             "WHERE (prijavitelj_user_id = :userID OR institucija_id = " +
                 "(SELECT institucija_id FROM Super_voditelj WHERE user_id = :userID AND active = true)) " +
             "AND (status = :status OR :status IS NULL) " +
+            "AND (priority = :priority OR :priority IS NULL) " +
             "AND (sluzba_id = :departmentID OR :departmentID IS NULL)", nativeQuery = true)
-    long countInstitutionLeadersTickets(String userID, String status, Integer departmentID);
+    long countInstitutionLeadersTickets(String userID, String status, Integer priority, Integer departmentID);
 
 }

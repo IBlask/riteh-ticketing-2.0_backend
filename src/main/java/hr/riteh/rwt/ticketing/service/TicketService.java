@@ -56,6 +56,7 @@ public class TicketService {
         newTicket.setApplicantID(userID);
         newTicket.setCreatedAt(LocalDateTime.now());
         newTicket.setStatus("Otvoren");
+        newTicket.setPriority(0);
 
         ticketRepository.save(newTicket);
 
@@ -201,34 +202,34 @@ public class TicketService {
 
         //agent
         if (employee.isPresent() && employee.get().getRole() == 'a') {
-            tickets = ticketRepository.findAllAgentsTickets(userID, (pageNumber - 1) * 50, requestDto.getStatus(), requestDto.getDepartmentID());
-            numberOfTickets = ticketRepository.countAgentsTickets(userID, requestDto.getStatus(), requestDto.getDepartmentID());
+            tickets = ticketRepository.findAllAgentsTickets(userID, (pageNumber - 1) * 50, requestDto.getStatus(), requestDto.getPriority(), requestDto.getDepartmentID());
+            numberOfTickets = ticketRepository.countAgentsTickets(userID, requestDto.getStatus(), requestDto.getPriority(), requestDto.getDepartmentID());
         }
 
         //department leader
         else if (employee.isPresent() && employee.get().getRole() == 'v') {
-            tickets = ticketRepository.findAllDepartmentLeadersTickets(userID, (pageNumber - 1) * 50, requestDto.getStatus(), requestDto.getDepartmentID());
-            numberOfTickets = ticketRepository.countDepartmentLeadersTickets(userID, requestDto.getStatus(), requestDto.getDepartmentID());
+            tickets = ticketRepository.findAllDepartmentLeadersTickets(userID, (pageNumber - 1) * 50, requestDto.getStatus(), requestDto.getPriority(), requestDto.getDepartmentID());
+            numberOfTickets = ticketRepository.countDepartmentLeadersTickets(userID, requestDto.getStatus(), requestDto.getPriority(), requestDto.getDepartmentID());
         }
 
         //institution leader
         else if (employeeRepository.institutionLeaderExistsByUserID(userID).isPresent()) {
-            tickets = ticketRepository.findAllInstitutionLeadersTickets(userID, (pageNumber - 1) * 50, requestDto.getStatus(), requestDto.getDepartmentID());
-            numberOfTickets = ticketRepository.countInstitutionLeadersTickets(userID, requestDto.getStatus(), requestDto.getDepartmentID());
+            tickets = ticketRepository.findAllInstitutionLeadersTickets(userID, (pageNumber - 1) * 50, requestDto.getStatus(), requestDto.getPriority(), requestDto.getDepartmentID());
+            numberOfTickets = ticketRepository.countInstitutionLeadersTickets(userID, requestDto.getStatus(), requestDto.getPriority(), requestDto.getDepartmentID());
         }
 
         //normal user
         else {
-            tickets = ticketRepository.findAllUsersTickets(userID, (pageNumber - 1) * 50, requestDto.getStatus(), requestDto.getDepartmentID());
-            numberOfTickets = ticketRepository.countUsersTickets(userID, requestDto.getStatus(), requestDto.getDepartmentID());
+            tickets = ticketRepository.findAllUsersTickets(userID, (pageNumber - 1) * 50, requestDto.getStatus(), requestDto.getPriority(), requestDto.getDepartmentID());
+            numberOfTickets = ticketRepository.countUsersTickets(userID, requestDto.getStatus(), requestDto.getPriority(), requestDto.getDepartmentID());
         }
 
-        String[] priorityNames =  {"Nije hitno", "Normalno", "Hitno"};
+        String[] priorityNames =  {"Nije određeno", "Nije hitno", "Normalno", "Hitno"};
         List<GetAllTicketsResponseDto> returnList = new ArrayList<>();
         for (TicketSummaryDao ticket : tickets) {
             String categoryName = categoryRepository.findById(ticket.getKategorija_id()).getName();
             String departmentName = departmentRepository.findById(ticket.getSluzba_id()).getName();
-            String priority = (ticket.getPriority() == null) ? "Nije određeno" : priorityNames[ticket.getPriority()];
+            String priority = priorityNames[ticket.getPriority()];
 
             returnList.add(new GetAllTicketsResponseDto(ticket, categoryName, departmentName, priority));
         }

@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS Ticket (
     kategorija_id int NOT NULL,
     created_at timestamp NOT NULL,
     status varchar(64) NOT NULL,
-    priority tinyint,
+    priority tinyint NOT NULL,
     deadline date,
     est_fix_time time,
     real_fix_time time,
