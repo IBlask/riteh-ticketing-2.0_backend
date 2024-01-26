@@ -99,7 +99,7 @@ public class TicketService {
             return successDto;
         }
         this.department = departmentRepository.findById(category.getDepartmentID());
-        if (this.department == null) {
+        if (!category.isActive() || this.department == null) {
             successDto.setSuccessFalse("Dogodila se greška u sustavu! Molimo odaberite drugu kategoriju koja najbliže opisuje problem.");
             return successDto;
         }

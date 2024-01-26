@@ -32,4 +32,8 @@ public class Category {
     public int getDepartmentID() {
         return departmentID;
     }
+
+    public boolean isActive() {
+        return active;
+    }
 }
