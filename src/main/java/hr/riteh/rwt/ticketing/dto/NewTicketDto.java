@@ -7,6 +7,7 @@ public class NewTicketDto {
     private String room;
     private String realApplicantID;
     private Integer categoryID;
+    private Integer priority;
 
 
     public Long getParentID() {
@@ -33,8 +34,12 @@ public class NewTicketDto {
         return categoryID;
     }
 
+    public Integer getPriority() {
+        return priority;
+    }
 
     public void setRealApplicantIDAsNull() {
         this.realApplicantID = null;
     }
+
 }

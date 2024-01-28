@@ -38,7 +38,7 @@ public class Ticket {
     @Column(name = "status")
     private String status;
     @Column(name = "priority")
-    private Integer priority;
+    private int priority;
     @Column(name = "deadline")
     private Date deadline;
     @Column(name = "est_fix_time")
@@ -112,6 +112,12 @@ public class Ticket {
     public String getStatus() {
         return status;
     }
+
+    public int getPriority() {
+        return priority;
+    }
+
+
 
     public void setId(long id) {
         this.id = id;

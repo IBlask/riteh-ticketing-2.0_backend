@@ -48,6 +48,15 @@ public class TicketService {
             return ResponseEntity.ok(successDto);
         }
 
+        //verifying if user is obligated to set priority
+        if (newTicketDto.getPriority() != null) {
+            Optional<Employee> employee = employeeRepository.findById(userID);
+            if (employee.isEmpty() || employee.get().getRole() != 'v' || employee.get().getDepartmentID() != department.getId()) {
+                successDto.setSuccessFalse("Nemate ovlasti mijenjati prioritet ticketa!");
+                return ResponseEntity.ok(successDto);
+            }
+        }
+
         //ENTERING DATA TO THE DATABASE
         Ticket newTicket = new Ticket(newTicketDto);
         newTicket.setDepartmentID(this.department.getId());
@@ -55,8 +64,18 @@ public class TicketService {
         newTicket.setInstitutionID(institutionID);
         newTicket.setApplicantID(userID);
         newTicket.setCreatedAt(LocalDateTime.now());
-        newTicket.setStatus("Otvoren");
-        newTicket.setPriority(0);
+        if (newTicketDto.getParentID() == null) {
+            newTicket.setStatus("Otvoren");
+            newTicket.setPriority(0);
+        }
+        else {
+            Ticket parent = ticketRepository.findById(newTicket.getParentID().longValue());
+            newTicket.setStatus(parent.getStatus());
+            newTicket.setPriority(parent.getPriority());
+        }
+        if (newTicketDto.getPriority() != null) {
+            newTicket.setPriority(newTicketDto.getPriority());
+        }
 
         ticketRepository.save(newTicket);
 
