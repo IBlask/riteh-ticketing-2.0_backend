@@ -1,5 +1,7 @@
 package hr.riteh.rwt.ticketing.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import hr.riteh.rwt.ticketing.dto.GetAllTicketsRequestDto;
 import hr.riteh.rwt.ticketing.dto.GetTicketRequestDto;
 import hr.riteh.rwt.ticketing.dto.NewTicketDto;
@@ -7,9 +9,11 @@ import hr.riteh.rwt.ticketing.dto.SuccessDto;
 import hr.riteh.rwt.ticketing.service.TicketService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @CrossOrigin
@@ -18,10 +22,21 @@ public class TicketController {
 
     @Autowired
     TicketService ticketService;
+    @Autowired
+    ObjectMapper objectMapper;
 
-    @PostMapping(value = "/new", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<SuccessDto> newTicket (HttpServletRequest httpServletRequest, @RequestBody NewTicketDto newTicketDto) {
-        return ticketService.newTicket(httpServletRequest, newTicketDto);
+    @PostMapping(value = "/new", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<SuccessDto> newTicket (HttpServletRequest httpServletRequest,
+                                                 @RequestParam(value = "jsonData") String jsonData,
+                                                 @RequestParam(required = false, value = "image") MultipartFile ticketImage) throws JsonProcessingException {
+
+        if (jsonData.isBlank()) {
+            SuccessDto successDto = new SuccessDto();
+            successDto.setSuccessFalse("Nema podataka u tijelu zahtjeva!");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(successDto);
+        }
+        NewTicketDto newTicketDto = objectMapper.readValue(jsonData, NewTicketDto.class);
+        return ticketService.newTicket(httpServletRequest, newTicketDto, ticketImage);
     }
 
     @PostMapping(value = "/get-ticket", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)

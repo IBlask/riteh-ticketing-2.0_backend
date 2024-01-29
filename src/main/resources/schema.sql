@@ -86,6 +86,7 @@ CREATE TABLE IF NOT EXISTS Ticket (
     deadline date,
     est_fix_time time,
     real_fix_time time,
+    visible boolean NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (parent_id) REFERENCES Ticket(id),
     FOREIGN KEY (sluzba_id) REFERENCES Sluzba(id),

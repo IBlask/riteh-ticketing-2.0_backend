@@ -45,6 +45,8 @@ public class Ticket {
     private Time estFicTime;
     @Column(name = "real_fix_time")
     private Time realFixTime;
+    @Column(name = "visible")
+    private boolean visible;
 
 
     public Ticket() {
@@ -58,6 +60,7 @@ public class Ticket {
         this.room = newTicketDto.getRoom();
         this.categoryID = newTicketDto.getCategoryID();
         this.realApplicantID = newTicketDto.getRealApplicantID();
+        this.visible = true;
     }
 
 

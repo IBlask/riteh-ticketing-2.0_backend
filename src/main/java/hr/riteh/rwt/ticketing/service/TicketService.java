@@ -1,16 +1,23 @@
 package hr.riteh.rwt.ticketing.service;
 
 import hr.riteh.rwt.ticketing.auth.JwtUtil;
+import hr.riteh.rwt.ticketing.dao.TicketIdDao;
 import hr.riteh.rwt.ticketing.dao.TicketSummaryDao;
 import hr.riteh.rwt.ticketing.dto.*;
 import hr.riteh.rwt.ticketing.entity.*;
 import hr.riteh.rwt.ticketing.repository.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,11 +41,14 @@ public class TicketService {
     @Autowired
     EmployeeRepository employeeRepository;
 
+    @Value("${ticket-photo.path}")
+    private String ticketsPhotosPath;
+
 
     private int institutionID;
     private Department department;
 
-    public ResponseEntity<SuccessDto> newTicket(HttpServletRequest httpServletRequest, NewTicketDto newTicketDto) {
+    public ResponseEntity<SuccessDto> newTicket(HttpServletRequest httpServletRequest, NewTicketDto newTicketDto, MultipartFile ticketImage) {
         String userID = jwtUtil.resolveClaims(jwtUtil.resolveToken(httpServletRequest)).getSubject();
         this.institutionID = userRepository.findByUserID(userID).getInstitutionId();
 
@@ -53,6 +63,21 @@ public class TicketService {
             Optional<Employee> employee = employeeRepository.findById(userID);
             if (employee.isEmpty() || employee.get().getRole() != 'v' || employee.get().getDepartmentID() != department.getId()) {
                 successDto.setSuccessFalse("Nemate ovlasti mijenjati prioritet ticketa!");
+                return ResponseEntity.ok(successDto);
+            }
+        }
+
+        //SAVING IMAGE
+        if (!ticketImage.isEmpty()) {
+            try {
+                Optional<TicketIdDao> lastTicketID = ticketRepository.findTopByOrderByIdDesc();
+                long newTicketID = lastTicketID.map(ticket -> ticket.getId() + 1).orElse(1L);
+
+                byte[] bytes = ticketImage.getBytes();
+                Path path = Paths.get(ticketsPhotosPath + newTicketID + ".jpg");
+                Files.write(path, bytes);
+            } catch (IOException e) {
+                successDto.setSuccessFalse("Došlo je do greške prilikom spremanja fotografije. Molimo pokušajte ponovno.");
                 return ResponseEntity.ok(successDto);
             }
         }
