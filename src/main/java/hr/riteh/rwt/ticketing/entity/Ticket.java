@@ -37,6 +37,8 @@ public class Ticket {
     private LocalDateTime createdAt;
     @Column(name = "updated_at", columnDefinition = "TIMESTAMP")
     private LocalDateTime updatedAt;
+    @Column(name = "updated_by")
+    private String updatedBy;
     @Column(name = "status")
     private String status;
     @Column(name = "priority")
@@ -118,6 +120,10 @@ public class Ticket {
         return updatedAt;
     }
 
+    public String getUpdatedBy() {
+        return updatedBy;
+    }
+
     public String getStatus() {
         return status;
     }
@@ -148,12 +154,20 @@ public class Ticket {
         this.applicantID = applicantID;
     }
 
+    public void setRealApplicantID(String realApplicantID) {
+        this.realApplicantID = realApplicantID;
+    }
+
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public void setUpdatedBy(String updatedBy) {
+        this.updatedBy = updatedBy;
     }
 
     public void setStatus(String status) {

@@ -15,6 +15,8 @@ public class GetTicketResponseDto {
     private String category;
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime lastUpdatedAt;
     private String status;
     private String applicantID;
     private String applicantFullName;
@@ -24,6 +26,8 @@ public class GetTicketResponseDto {
     private String department;
     private String departmentLeaderID;
     private String departmentLeaderFullName;
+    private String ticketImage;
+    private List<GetTicketChangeDto> changes;
 
 
     public void setTicketID(long ticketID) {
@@ -48,6 +52,10 @@ public class GetTicketResponseDto {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public void setLastUpdatedAt(LocalDateTime lastUpdatedAt) {
+        this.lastUpdatedAt = lastUpdatedAt;
     }
 
     public void setStatus(String status) {
@@ -84,5 +92,13 @@ public class GetTicketResponseDto {
 
     public void setDepartmentLeaderFullName(String departmentLeaderFullName) {
         this.departmentLeaderFullName = departmentLeaderFullName;
+    }
+
+    public void setTicketImage(String ticketImage) {
+        this.ticketImage = ticketImage;
+    }
+
+    public void setChanges(List<GetTicketChangeDto> changes) {
+        this.changes = changes;
     }
 }

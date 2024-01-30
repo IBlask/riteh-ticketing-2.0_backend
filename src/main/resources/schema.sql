@@ -82,6 +82,7 @@ CREATE TABLE IF NOT EXISTS Ticket (
     kategorija_id int NOT NULL,
     created_at timestamp NOT NULL,
     updated_at timestamp NOT NULL,
+    updated_by varchar(64),
     status varchar(64) NOT NULL,
     priority tinyint NOT NULL,
     deadline date,
@@ -95,7 +96,8 @@ CREATE TABLE IF NOT EXISTS Ticket (
     FOREIGN KEY (prostorija, institucija_id) REFERENCES Prostorija(oznaka, institucija_id),
     FOREIGN KEY (prijavitelj_user_id) REFERENCES Users(user_id),
     FOREIGN KEY (stvarni_prijavitelj_user_id) REFERENCES Users(user_id),
-    FOREIGN KEY (kategorija_id) REFERENCES Kategorija(id)
+    FOREIGN KEY (kategorija_id) REFERENCES Kategorija(id),
+    FOREIGN KEY (updated_by) REFERENCES Users(user_id)
 );
 
 CREATE TABLE IF NOT EXISTS Agent_Ticket (

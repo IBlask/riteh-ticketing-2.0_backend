@@ -7,6 +7,7 @@ import hr.riteh.rwt.ticketing.dto.*;
 import hr.riteh.rwt.ticketing.entity.*;
 import hr.riteh.rwt.ticketing.repository.*;
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -14,14 +15,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class TicketService {
@@ -47,6 +47,7 @@ public class TicketService {
 
     private int institutionID;
     private Department department;
+    private final String[] priorityNames = {"Nije određeno", "Nije hitno", "Normalno", "Hitno"};
 
     public ResponseEntity<SuccessDto> newTicket(HttpServletRequest httpServletRequest, NewTicketDto newTicketDto, MultipartFile ticketImage) {
         String userID = jwtUtil.resolveClaims(jwtUtil.resolveToken(httpServletRequest)).getSubject();
@@ -58,9 +59,41 @@ public class TicketService {
             return ResponseEntity.ok(successDto);
         }
 
+        //verifying if user is obligated to make changes to ticket
+        Optional<Employee> employee = employeeRepository.findById(userID);
+        boolean obligated = false;
+        if (newTicketDto.getParentID() != null) {
+            if (ticketRepository.findById(newTicketDto.getParentID().longValue()).getApplicantID().equals(userID)) {
+                obligated = true;
+            }
+            else if (employee.isPresent()) {
+                if (employee.get().getRole() == 'a' && employee.get().isActive() && ticketRepository.findAllAgentsAssignedToTicket(newTicketDto.getParentID()).contains(userID)) {
+                    obligated = true;
+                } else if (employee.get().getRole() == 'v' && employee.get().isActive() && ticketRepository.findById(newTicketDto.getParentID().longValue()).getDepartmentID() == employee.get().getDepartmentID()) {
+                    obligated = true;
+                }
+            }
+            else {
+                Optional<Integer> leadersInstitutionID = employeeRepository.getInstitutionIdByInstitutionLeaderUserID(userID);
+                if (leadersInstitutionID.isPresent() && leadersInstitutionID.get() == this.department.getInstitutionID()) {
+                    obligated = true;
+                }
+            }
+
+            if (!obligated) {
+                successDto.setSuccessFalse("Nemate ovlasti raditi izmjene!");
+                return ResponseEntity.ok(successDto);
+            }
+        }
+
+        //change can't have an image
+        if (newTicketDto.getParentID() != null && ticketImage != null) {
+            successDto.setSuccessFalse("Izmjene ticketa ne mogu imati sliku!");
+            return ResponseEntity.ok(successDto);
+        }
+
         //verifying if user is obligated to set priority
         if (newTicketDto.getPriority() != null) {
-            Optional<Employee> employee = employeeRepository.findById(userID);
             if (employee.isEmpty() || employee.get().getRole() != 'v' || employee.get().getDepartmentID() != department.getId()) {
                 successDto.setSuccessFalse("Nemate ovlasti mijenjati prioritet ticketa!");
                 return ResponseEntity.ok(successDto);
@@ -87,19 +120,23 @@ public class TicketService {
         newTicket.setDepartmentID(this.department.getId());
         newTicket.setDepartmentLeaderID(employeeRepository.findByDepartmentIDAndRoleAndActive(department.getId(), 'v', true).getUserID());
         newTicket.setInstitutionID(institutionID);
-        newTicket.setApplicantID(userID);
         if (newTicketDto.getParentID() == null) {
+            newTicket.setApplicantID(userID);
             newTicket.setStatus("Otvoren");
             newTicket.setPriority(0);
             newTicket.setCreatedAt(LocalDateTime.now());
             newTicket.setUpdatedAt(newTicket.getCreatedAt());
+            newTicket.setUpdatedBy(null);
         }
         else {
             Ticket parent = ticketRepository.findById(newTicket.getParentID().longValue());
+            newTicket.setApplicantID(parent.getApplicantID());
+            if (newTicketDto.getRealApplicantID() == null) newTicket.setRealApplicantID(parent.getRealApplicantID());
             newTicket.setStatus(parent.getStatus());
             newTicket.setPriority(parent.getPriority());
             newTicket.setCreatedAt(parent.getCreatedAt());
             newTicket.setUpdatedAt(LocalDateTime.now());
+            newTicket.setUpdatedBy(userID);
         }
         if (newTicketDto.getPriority() != null) {
             newTicket.setPriority(newTicketDto.getPriority());
@@ -202,6 +239,7 @@ public class TicketService {
         Ticket ticket = ticketRepository.findById(ticketID.longValue());
         List<String> agents = ticketRepository.findAllAgentsAssignedToTicket(ticketID);
 
+        //TICKET DETAILS
         GetTicketResponseDto responseDto = new GetTicketResponseDto();
         responseDto.setTicketID(ticket.getId());
         responseDto.setTitle(ticket.getTitle());
@@ -209,6 +247,7 @@ public class TicketService {
         responseDto.setRoom(ticket.getRoom());
         responseDto.setCategory(categoryRepository.findById(ticket.getCategoryID()).getName());
         responseDto.setCreatedAt(ticket.getCreatedAt());
+        responseDto.setLastUpdatedAt(ticket.getUpdatedAt());
         responseDto.setStatus(ticket.getStatus());
         responseDto.setApplicantID(ticket.getApplicantID());
         responseDto.setRealApplicantID(ticket.getRealApplicantID());
@@ -226,6 +265,95 @@ public class TicketService {
 
         User departmentLeader = userRepository.findByUserID(ticket.getDepartmentLeaderID());
         responseDto.setDepartmentLeaderFullName(departmentLeader.getFirstName() + " " + departmentLeader.getLastName());
+
+        //TICKET CHANGES
+        List<GetTicketChangeDto> ticketChanges = new ArrayList<>();
+        while (ticket.getParentID() != null) {
+            Optional<Ticket> parentTicketOpt = ticketRepository.findById(ticket.getParentID());
+            if (parentTicketOpt.isEmpty()) break;
+            Ticket parentTicket = parentTicketOpt.get();
+
+            //priority
+            if (ticket.getPriority() != parentTicket.getPriority()) {
+                GetTicketChangeDto change = new GetTicketChangeDto();
+                change.setUser(ticket.getUpdatedBy());
+                change.setChangedAt(ticket.getUpdatedAt());
+                change.setChangedField("Prioritet");
+                change.setChange(priorityNames[parentTicket.getPriority()] + " -> " + priorityNames[ticket.getPriority()]);
+                ticketChanges.add(0, change);
+            }
+            //status
+            if (!Objects.equals(ticket.getStatus(), parentTicket.getStatus())) {
+                GetTicketChangeDto change = new GetTicketChangeDto();
+                change.setUser(ticket.getUpdatedBy());
+                change.setChangedAt(ticket.getUpdatedAt());
+                change.setChangedField("Status");
+                change.setChange(parentTicket.getStatus() + " -> " + ticket.getStatus());
+                ticketChanges.add(0, change);
+            }
+            //category
+            if (ticket.getCategoryID() != parentTicket.getCategoryID()) {
+                GetTicketChangeDto change = new GetTicketChangeDto();
+                change.setUser(ticket.getUpdatedBy());
+                change.setChangedAt(ticket.getUpdatedAt());
+                change.setChangedField("Kategorija");
+                change.setChange(categoryRepository.findById(parentTicket.getCategoryID()).getName() + " -> " + categoryRepository.findById(ticket.getCategoryID()).getName());
+                ticketChanges.add(0, change);
+            }
+            //real applicant
+            if (!Objects.equals(ticket.getRealApplicantID(), parentTicket.getRealApplicantID())) {
+                GetTicketChangeDto change = new GetTicketChangeDto();
+                change.setUser(ticket.getUpdatedBy());
+                change.setChangedAt(ticket.getUpdatedAt());
+                change.setChangedField("Stvarni prijavitelj");
+                User oldRealApplicant = userRepository.findByUserID(parentTicket.getRealApplicantID());
+                User newRealApplicant = userRepository.findByUserID(ticket.getRealApplicantID());
+                change.setChange(oldRealApplicant.getFirstName() + " " + oldRealApplicant.getLastName() + " (" + oldRealApplicant.getUserID() + ") "
+                        + " -> "
+                        + newRealApplicant.getFirstName() + " " + newRealApplicant.getLastName() + " (" + newRealApplicant.getUserID() + ")");
+                ticketChanges.add(0, change);
+            }
+            //room
+            if (!Objects.equals(ticket.getRoom(), parentTicket.getRoom())) {
+                GetTicketChangeDto change = new GetTicketChangeDto();
+                change.setUser(ticket.getUpdatedBy());
+                change.setChangedAt(ticket.getUpdatedAt());
+                change.setChangedField("Prostorija");
+                change.setChange(parentTicket.getRoom() + " -> " + ticket.getRoom());
+                ticketChanges.add(0, change);
+            }
+            //description
+            if (!Objects.equals(ticket.getDescription(), parentTicket.getDescription())) {
+                GetTicketChangeDto change = new GetTicketChangeDto();
+                change.setUser(ticket.getUpdatedBy());
+                change.setChangedAt(ticket.getUpdatedAt());
+                change.setChangedField("Opis");
+                change.setChange(parentTicket.getDescription() + " -> " + ticket.getDescription());
+                ticketChanges.add(0, change);
+            }
+            //title
+            if (!Objects.equals(ticket.getTitle(), parentTicket.getTitle())) {
+                GetTicketChangeDto change = new GetTicketChangeDto();
+                change.setUser(ticket.getUpdatedBy());
+                change.setChangedAt(ticket.getUpdatedAt());
+                change.setChangedField("Naslov");
+                change.setChange(parentTicket.getTitle() + " -> " + ticket.getTitle());
+                ticketChanges.add(0, change);
+            }
+
+            ticket = parentTicket;
+        }
+        responseDto.setChanges(ticketChanges);
+
+        //TICKET IMAGE
+        String encodedImage;
+        try {
+            byte[] fileContent = FileUtils.readFileToByteArray(new File(ticketsPhotosPath + ticket.getId() + ".jpg"));
+            encodedImage = Base64.getEncoder().encodeToString(fileContent);
+        } catch (IOException e) {
+            encodedImage = null;
+        }
+        responseDto.setTicketImage(encodedImage);
 
         return ResponseEntity.ok(responseDto);
     }

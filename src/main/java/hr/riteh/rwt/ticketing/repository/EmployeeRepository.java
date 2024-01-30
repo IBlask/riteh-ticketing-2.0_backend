@@ -11,4 +11,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
 
     @Query(value = "SELECT user_id FROM Super_voditelj WHERE user_id = :userID", nativeQuery = true)
     Optional<String> institutionLeaderExistsByUserID(String userID);
+
+    @Query(value = "SELECT institucija_id FROM Super_voditelj WHERE user_id = :userID AND active = true", nativeQuery = true)
+    Optional<Integer> getInstitutionIdByInstitutionLeaderUserID(String userID);
 }
