@@ -35,6 +35,8 @@ public class Ticket {
     private int categoryID;
     @Column(name = "created_at", columnDefinition = "TIMESTAMP")
     private LocalDateTime createdAt;
+    @Column(name = "updated_at", columnDefinition = "TIMESTAMP")
+    private LocalDateTime updatedAt;
     @Column(name = "status")
     private String status;
     @Column(name = "priority")
@@ -112,6 +114,10 @@ public class Ticket {
         return createdAt;
     }
 
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
     public String getStatus() {
         return status;
     }
@@ -144,6 +150,10 @@ public class Ticket {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public void setStatus(String status) {

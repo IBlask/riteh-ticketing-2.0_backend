@@ -22,7 +22,8 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
 
     @Query(value = "SELECT * FROM Ticket " +
-            "WHERE prijavitelj_user_id = :userID " +
+            "WHERE id NOT IN (SELECT parent_id FROM Ticket WHERE parent_id IS NOT NULL) AND visible = true " +
+            "AND prijavitelj_user_id = :userID " +
             "AND (status = :status OR :status IS NULL) " +
             "AND (priority = :priority OR :priority IS NULL) " +
             "AND (sluzba_id = :departmentID OR :departmentID IS NULL) " +
@@ -30,7 +31,8 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     List<TicketSummaryDao> findAllUsersTickets(String userID, int offset, String status, Integer priority, Integer departmentID);
 
     @Query(value = "SELECT COUNT(id) FROM Ticket " +
-            "WHERE prijavitelj_user_id = :userID " +
+            "WHERE id NOT IN (SELECT parent_id FROM Ticket WHERE parent_id IS NOT NULL) AND visible = true " +
+            "AND prijavitelj_user_id = :userID " +
             "AND (status = :status OR :status IS NULL) " +
             "AND (priority = :priority OR :priority IS NULL) " +
             "AND (sluzba_id = :departmentID OR :departmentID IS NULL)", nativeQuery = true)
@@ -39,7 +41,8 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
 
     @Query(value = "SELECT * FROM Ticket " +
-            "WHERE (prijavitelj_user_id = :userID OR id IN (SELECT ticket_id FROM Agent_Ticket WHERE agent_user_id = :userID)) " +
+            "WHERE id NOT IN (SELECT parent_id FROM Ticket WHERE parent_id IS NOT NULL) AND visible = true " +
+            "AND (prijavitelj_user_id = :userID OR id IN (SELECT ticket_id FROM Agent_Ticket WHERE agent_user_id = :userID)) " +
             "AND (status = :status OR :status IS NULL) " +
             "AND (priority = :priority OR :priority IS NULL) " +
             "AND (sluzba_id = :departmentID OR :departmentID IS NULL) " +
@@ -47,7 +50,8 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     List<TicketSummaryDao> findAllAgentsTickets(String userID, int offset, String status, Integer priority, Integer departmentID);
 
     @Query(value = "SELECT COUNT(id) FROM Ticket " +
-            "WHERE (prijavitelj_user_id = :userID OR id IN (SELECT ticket_id FROM Agent_Ticket WHERE agent_user_id = :userID)) " +
+            "WHERE id NOT IN (SELECT parent_id FROM Ticket WHERE parent_id IS NOT NULL) AND visible = true " +
+            "AND (prijavitelj_user_id = :userID OR id IN (SELECT ticket_id FROM Agent_Ticket WHERE agent_user_id = :userID)) " +
             "AND (status = :status OR :status IS NULL) " +
             "AND (priority = :priority OR :priority IS NULL) " +
             "AND (sluzba_id = :departmentID OR :departmentID IS NULL)", nativeQuery = true)
@@ -56,7 +60,8 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
 
     @Query(value = "SELECT * FROM Ticket " +
-            "WHERE (prijavitelj_user_id = :userID OR voditelj_user_id = :userID) " +
+            "WHERE id NOT IN (SELECT parent_id FROM Ticket WHERE parent_id IS NOT NULL) AND visible = true " +
+            "AND (prijavitelj_user_id = :userID OR voditelj_user_id = :userID) " +
             "AND (status = :status OR :status IS NULL) " +
             "AND (priority = :priority OR :priority IS NULL) " +
             "AND (sluzba_id = :departmentID OR :departmentID IS NULL) " +
@@ -64,7 +69,8 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     List<TicketSummaryDao> findAllDepartmentLeadersTickets(String userID, int offset, String status, Integer priority, Integer departmentID);
 
     @Query(value = "SELECT COUNT(id) FROM Ticket " +
-            "WHERE (prijavitelj_user_id = :userID OR voditelj_user_id = :userID) " +
+            "WHERE id NOT IN (SELECT parent_id FROM Ticket WHERE parent_id IS NOT NULL) AND visible = true " +
+            "AND (prijavitelj_user_id = :userID OR voditelj_user_id = :userID) " +
             "AND (status = :status OR :status IS NULL) " +
             "AND (priority = :priority OR :priority IS NULL) " +
             "AND (sluzba_id = :departmentID OR :departmentID IS NULL)", nativeQuery = true)
@@ -73,7 +79,8 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
 
     @Query(value = "SELECT * FROM Ticket " +
-            "WHERE (prijavitelj_user_id = :userID OR institucija_id = " +
+            "WHERE id NOT IN (SELECT parent_id FROM Ticket WHERE parent_id IS NOT NULL) AND visible = true " +
+            "AND (prijavitelj_user_id = :userID OR institucija_id = " +
                 "(SELECT institucija_id FROM Super_voditelj WHERE user_id = :userID AND active = true)) " +
             "AND (status = :status OR :status IS NULL) " +
             "AND (priority = :priority OR :priority IS NULL) " +
@@ -82,7 +89,8 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     List<TicketSummaryDao> findAllInstitutionLeadersTickets(String userID, int offset, String status, Integer priority, Integer departmentID);
 
     @Query(value = "SELECT COUNT(id) FROM Ticket " +
-            "WHERE (prijavitelj_user_id = :userID OR institucija_id = " +
+            "WHERE id NOT IN (SELECT parent_id FROM Ticket WHERE parent_id IS NOT NULL) AND visible = true " +
+            "AND (prijavitelj_user_id = :userID OR institucija_id = " +
                 "(SELECT institucija_id FROM Super_voditelj WHERE user_id = :userID AND active = true)) " +
             "AND (status = :status OR :status IS NULL) " +
             "AND (priority = :priority OR :priority IS NULL) " +

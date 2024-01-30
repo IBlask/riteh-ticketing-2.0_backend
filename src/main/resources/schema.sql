@@ -81,6 +81,7 @@ CREATE TABLE IF NOT EXISTS Ticket (
     stvarni_prijavitelj_user_id varchar(64),
     kategorija_id int NOT NULL,
     created_at timestamp NOT NULL,
+    updated_at timestamp NOT NULL,
     status varchar(64) NOT NULL,
     priority tinyint NOT NULL,
     deadline date,

@@ -68,7 +68,7 @@ public class TicketService {
         }
 
         //SAVING IMAGE
-        if (!ticketImage.isEmpty()) {
+        if (ticketImage != null) {
             try {
                 Optional<TicketIdDao> lastTicketID = ticketRepository.findTopByOrderByIdDesc();
                 long newTicketID = lastTicketID.map(ticket -> ticket.getId() + 1).orElse(1L);
@@ -88,15 +88,18 @@ public class TicketService {
         newTicket.setDepartmentLeaderID(employeeRepository.findByDepartmentIDAndRoleAndActive(department.getId(), 'v', true).getUserID());
         newTicket.setInstitutionID(institutionID);
         newTicket.setApplicantID(userID);
-        newTicket.setCreatedAt(LocalDateTime.now());
         if (newTicketDto.getParentID() == null) {
             newTicket.setStatus("Otvoren");
             newTicket.setPriority(0);
+            newTicket.setCreatedAt(LocalDateTime.now());
+            newTicket.setUpdatedAt(newTicket.getCreatedAt());
         }
         else {
             Ticket parent = ticketRepository.findById(newTicket.getParentID().longValue());
             newTicket.setStatus(parent.getStatus());
             newTicket.setPriority(parent.getPriority());
+            newTicket.setCreatedAt(parent.getCreatedAt());
+            newTicket.setUpdatedAt(LocalDateTime.now());
         }
         if (newTicketDto.getPriority() != null) {
             newTicket.setPriority(newTicketDto.getPriority());
