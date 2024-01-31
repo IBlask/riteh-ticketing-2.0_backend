@@ -202,7 +202,7 @@ public class TicketService {
 
         //verification of the real applicant (if entered)
         String realApplicantID = newTicketDto.getRealApplicantID();
-        if (realApplicantID == null || !realApplicantID.isBlank()) {
+        if (realApplicantID != null && !realApplicantID.isBlank()) {
             User realApplicant = userRepository.findByUserID(realApplicantID);
             if (realApplicant == null) {
                 successDto.setSuccessFalse("Uneseni korisnik nije evidentiran u sustavu!");
