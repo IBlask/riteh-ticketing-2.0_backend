@@ -56,4 +56,9 @@ public class TicketController {
         return ticketService.deleteTicket(httpServletRequest, ticketID);
     }
 
+    @PostMapping(value = "/assign-agent", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<SuccessDto> assignAgent (HttpServletRequest httpServletRequest, @RequestBody AssignAgentDto requestDto) {
+        return ticketService.assignAgent(httpServletRequest, requestDto);
+    }
+
 }

@@ -71,7 +71,8 @@ public class TicketService {
                 obligated = true;
             }
             else if (employee.isPresent()) {
-                if (employee.get().getRole() == 'a' && employee.get().isActive() && ticketRepository.findAllAgentsAssignedToTicket(newTicketDto.getParentID()).contains(userID)) {
+                List<Long> linkedTicketsIDs = this.getLinkedTickets(newTicketDto.getParentID());
+                if (employee.get().getRole() == 'a' && employee.get().isActive() && ticketRepository.findAllAgentsAssignedToTicket(linkedTicketsIDs).contains(userID)) {
                     obligated = true;
                 } else if (employee.get().getRole() == 'v' && employee.get().isActive() && ticketRepository.findById(newTicketDto.getParentID().longValue()).getDepartmentID() == employee.get().getDepartmentID()) {
                     obligated = true;
@@ -243,7 +244,8 @@ public class TicketService {
         }
 
         Ticket ticket = ticketRepository.findById(ticketID.longValue());
-        List<String> agents = ticketRepository.findAllAgentsAssignedToTicket(ticketID);
+        List<Long> linkedTicketsIDs = this.getLinkedTickets(ticketID);
+        List<String> agents = ticketRepository.findAllAgentsAssignedToTicket(linkedTicketsIDs);
 
         //TICKET DETAILS
         GetTicketResponseDto responseDto = new GetTicketResponseDto();
@@ -461,7 +463,8 @@ public class TicketService {
         Optional<Employee> employee = employeeRepository.findById(userID);
         boolean obligated = false;
         if (employee.isPresent() && employee.get().isActive()) {
-            if (employee.get().getRole() == 'a' && ticketRepository.findAllAgentsAssignedToTicket(requestDto.getTicketID()).contains(userID) && !requestDto.getStatus().equals(acceptedStatuses[acceptedStatuses.length-1])) {
+            List<Long> linkedTicketsIDs = this.getLinkedTickets(requestDto.getTicketID());
+            if (employee.get().getRole() == 'a' && ticketRepository.findAllAgentsAssignedToTicket(linkedTicketsIDs).contains(userID) && !requestDto.getStatus().equals(acceptedStatuses[acceptedStatuses.length-1])) {
                 obligated = true;
             }
             else if (employee.get().getRole() == 'v') {
@@ -553,5 +556,86 @@ public class TicketService {
 
         successDto.setSuccessTrue();
         return ResponseEntity.ok(successDto);
+    }
+
+
+
+
+
+    public ResponseEntity<SuccessDto> assignAgent (HttpServletRequest httpServletRequest, AssignAgentDto requestDto) {
+        String userID = jwtUtil.resolveClaims(jwtUtil.resolveToken(httpServletRequest)).getSubject();
+        SuccessDto successDto = new SuccessDto();
+
+        //verify if user is obligated to assign an agent
+        Optional<Employee> employee = employeeRepository.findById(userID);
+        if (employee.isEmpty() || employee.get().getRole() != 'v' || !employee.get().isActive()) {
+            successDto.setSuccessFalse("Nemate ovlast dodjeljivati ticket agentu!");
+            return ResponseEntity.badRequest().body(successDto);
+        }
+
+        //verify DTO
+        if (requestDto.getTicketID() == null) {
+            successDto.setSuccessFalse("Niste odabrali ticket!");
+            return ResponseEntity.badRequest().body(successDto);
+        }
+        if (requestDto.getAgentID() == null) {
+            successDto.setSuccessFalse("Niste odabrali agenta!");
+            return ResponseEntity.badRequest().body(successDto);
+        }
+        if (!ticketRepository.existsById(requestDto.getTicketID())) {
+            successDto.setSuccessFalse("Ne postoji ticket s tim identifikacijskim brojem!");
+            return ResponseEntity.badRequest().body(successDto);
+        }
+        Optional<Employee> agent = employeeRepository.findById(requestDto.getAgentID());
+        if (agent.isEmpty()) {
+            successDto.setSuccessFalse("Odabrani agent nije u sustavu!");
+            return ResponseEntity.badRequest().body(successDto);
+        }
+        else if (!agent.get().isActive() || agent.get().getRole() != 'a') {
+            successDto.setSuccessFalse("Trenutno nije moguće zadužiti ticket odabranom agentu!");
+            return ResponseEntity.badRequest().body(successDto);
+        }
+
+        //verify if ticket is assigned to leaders department
+        if (employee.get().getDepartmentID() != ticketRepository.findById(requestDto.getTicketID().longValue()).getDepartmentID()) {
+            successDto.setSuccessFalse("Nemate ovlast dodijeliti odabrani ticket nekome agentu!");
+            return ResponseEntity.badRequest().body(successDto);
+        }
+
+        //check if agent is already assigned to the ticket
+        if (ticketRepository.agentIsAssignedToTicket(requestDto.getAgentID(), requestDto.getTicketID()).isPresent()) {
+            successDto.setSuccessFalse("Ticket je već dodijeljen odabranom agentu!");
+            return ResponseEntity.badRequest().body(successDto);
+        }
+
+        //assign ticket to agent
+        if (ticketRepository.assignAgentToTicket(requestDto.getAgentID(), requestDto.getTicketID()) == 0) {
+            successDto.setSuccessFalse("Došlo je do greške. Molimo pokušajte ponovno.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(successDto);
+        }
+        successDto.setSuccessTrue();
+        return ResponseEntity.ok(successDto);
+    }
+
+
+
+
+    private List<Long> getLinkedTickets(long ticketID) {
+        List<Long> linkedTicketsIDs = new ArrayList<>();
+
+        Optional<Ticket> ticket = Optional.ofNullable(ticketRepository.findById(ticketID));
+        while (ticket.isPresent() && ticket.get().getParentID() != null) {
+            linkedTicketsIDs.add(ticket.get().getId());
+            ticket = ticketRepository.findById(ticket.get().getParentID());
+        }
+        ticket.ifPresent(value -> linkedTicketsIDs.add(value.getId()));
+
+        Optional<Long> childTicketID = ticketRepository.findChild(ticketID);
+        while (childTicketID.isPresent()) {
+            linkedTicketsIDs.add(childTicketID.get());
+            childTicketID = ticketRepository.findChild(childTicketID.get());
+        }
+
+        return linkedTicketsIDs;
     }
 }

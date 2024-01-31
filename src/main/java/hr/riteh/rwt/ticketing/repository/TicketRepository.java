@@ -3,9 +3,10 @@ package hr.riteh.rwt.ticketing.repository;
 import hr.riteh.rwt.ticketing.dao.TicketIdDao;
 import hr.riteh.rwt.ticketing.dao.TicketSummaryDao;
 import hr.riteh.rwt.ticketing.entity.Ticket;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,8 +14,16 @@ import java.util.Optional;
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
     Ticket findById(long ticketID);
 
-    @Query(value = "SELECT agent_user_id FROM Agent_Ticket WHERE ticket_id = :ticketID", nativeQuery = true)
-    List<String> findAllAgentsAssignedToTicket(@Param("ticketID") long ticketID);
+    @Query(value = "SELECT agent_user_id FROM Agent_Ticket WHERE ticket_id IN :ticketID", nativeQuery = true)
+    List<String> findAllAgentsAssignedToTicket(List<Long> ticketID);
+
+    @Query(value = "SELECT ticket_id FROM Agent_Ticket WHERE agent_user_id = :agentID AND ticket_id = :ticketID", nativeQuery = true)
+    Optional<Long> agentIsAssignedToTicket(String agentID, long ticketID);
+
+    @Modifying
+    @Transactional
+    @Query(value = "INSERT INTO Agent_Ticket (agent_user_id, ticket_id) VALUES (:agentID, :ticketID)", nativeQuery = true)
+    int assignAgentToTicket(String agentID, long ticketID);
 
     Optional<TicketIdDao> findTopByOrderByIdDesc();
 
