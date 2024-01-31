@@ -12,7 +12,8 @@ public class GetTicketResponseDto {
     private String title;
     private String description;
     private String room;
-    private String category;
+    private int categoryID;
+    private String categoryName;
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
@@ -46,8 +47,12 @@ public class GetTicketResponseDto {
         this.room = room;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
+    public void setCategoryID(int categoryID) {
+        this.categoryID = categoryID;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
     }
 
     public void setCreatedAt(LocalDateTime createdAt) {

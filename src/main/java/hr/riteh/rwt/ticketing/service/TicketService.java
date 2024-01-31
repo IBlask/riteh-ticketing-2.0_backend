@@ -253,7 +253,8 @@ public class TicketService {
         responseDto.setTitle(ticket.getTitle());
         responseDto.setDescription(ticket.getDescription());
         responseDto.setRoom(ticket.getRoom());
-        responseDto.setCategory(categoryRepository.findById(ticket.getCategoryID()).getName());
+        responseDto.setCategoryID(ticket.getCategoryID());
+        responseDto.setCategoryName(categoryRepository.findById(ticket.getCategoryID()).getName());
         responseDto.setCreatedAt(ticket.getCreatedAt());
         responseDto.setLastUpdatedAt(ticket.getUpdatedAt());
         responseDto.setStatus(ticket.getStatus());
