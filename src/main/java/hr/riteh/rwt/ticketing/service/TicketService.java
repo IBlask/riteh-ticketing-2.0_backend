@@ -6,6 +6,7 @@ import hr.riteh.rwt.ticketing.dao.TicketSummaryDao;
 import hr.riteh.rwt.ticketing.dto.*;
 import hr.riteh.rwt.ticketing.entity.*;
 import hr.riteh.rwt.ticketing.repository.*;
+import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,8 @@ public class TicketService {
     RoomRepository roomRepository;
     @Autowired
     EmployeeRepository employeeRepository;
+    @Autowired
+    EntityManager entityManager;
 
     @Value("${ticket-photo.path}")
     private String ticketsPhotosPath;
@@ -48,6 +51,7 @@ public class TicketService {
     private int institutionID;
     private Department department;
     private final String[] priorityNames = {"Nije određeno", "Nije hitno", "Normalno", "Hitno"};
+    private final String[] acceptedStatuses = {"Otvoren", "U rješavanju", "Riješen", "Zaključen"};
 
     public ResponseEntity<SuccessDto> newTicket(HttpServletRequest httpServletRequest, NewTicketDto newTicketDto, MultipartFile ticketImage) {
         String userID = jwtUtil.resolveClaims(jwtUtil.resolveToken(httpServletRequest)).getSubject();
@@ -420,5 +424,68 @@ public class TicketService {
                 .header("numberOfPages", String.valueOf(numberOfPages))
                 .header("currentPage", String.valueOf(pageNumber))
                 .body(returnList);
+    }
+
+
+
+
+
+    public ResponseEntity<SuccessDto> changeStatus(HttpServletRequest httpServletRequest, ChangeStatusDto requestDto) {
+        String userID = jwtUtil.resolveClaims(jwtUtil.resolveToken(httpServletRequest)).getSubject();
+        SuccessDto successDto = new SuccessDto();
+
+        //verify DTO
+        if (requestDto.getTicketID() == null) {
+            successDto.setSuccessFalse("Niste odabrali ticket kojemu želite promijeniti status!");
+            return ResponseEntity.badRequest().body(successDto);
+        }
+        Optional<Ticket> ticket = ticketRepository.findById(requestDto.getTicketID());
+        if (ticket.isEmpty()) {
+            successDto.setSuccessFalse("Ne postoji ticket s tim identifikacijskim brojem!");
+            return ResponseEntity.badRequest().body(successDto);
+        }
+        else if (ticketRepository.findChild(requestDto.getTicketID()).isPresent()) {
+            successDto.setSuccessFalse("Odabranom ticketu nije moguće mijenjati status!");
+            return ResponseEntity.badRequest().body(successDto);
+        }
+        if (requestDto.getStatus() == null || requestDto.getStatus().isBlank()) {
+            successDto.setSuccessFalse("Niste odabrali status!");
+            return ResponseEntity.badRequest().body(successDto);
+        }
+        else if (Arrays.stream(acceptedStatuses).noneMatch(requestDto.getStatus()::equals)) {
+            successDto.setSuccessFalse("Sustav trenutno ne podržava odabrani status!");
+            return ResponseEntity.badRequest().body(successDto);
+        }
+
+        //verify if user is obligated to change status
+        Optional<Employee> employee = employeeRepository.findById(userID);
+        boolean obligated = false;
+        if (employee.isPresent() && employee.get().isActive()) {
+            if (employee.get().getRole() == 'a' && ticketRepository.findAllAgentsAssignedToTicket(requestDto.getTicketID()).contains(userID) && !requestDto.getStatus().equals(acceptedStatuses[acceptedStatuses.length-1])) {
+                obligated = true;
+            }
+            else if (employee.get().getRole() == 'v') {
+                if (ticketRepository.findById(requestDto.getTicketID()).isEmpty()) {
+                    successDto.setSuccessFalse("Ne postoji ticket s tim identifikacijskim brojem!");
+                    return ResponseEntity.badRequest().body(successDto);
+                }
+                else if (employee.get().getDepartmentID() == ticketRepository.findById(requestDto.getTicketID().longValue()).getDepartmentID()) {
+                    obligated = true;
+                }
+            }
+        }
+        if (!obligated) {
+            successDto.setSuccessFalse("Nemate ovlasti mijenjati status ticketu!");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(successDto);
+        }
+
+        //CHANGE STATUS
+        Ticket newTicket = ticket.get();
+        entityManager.detach(newTicket);
+        newTicket.setStatus(requestDto.getStatus());
+        newTicket.makeChange(userID);
+        ticketRepository.save(newTicket);
+        successDto.setSuccessTrue();
+        return ResponseEntity.ok(successDto);
     }
 }

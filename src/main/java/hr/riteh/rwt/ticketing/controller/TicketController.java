@@ -2,10 +2,7 @@ package hr.riteh.rwt.ticketing.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import hr.riteh.rwt.ticketing.dto.GetAllTicketsRequestDto;
-import hr.riteh.rwt.ticketing.dto.GetTicketRequestDto;
-import hr.riteh.rwt.ticketing.dto.NewTicketDto;
-import hr.riteh.rwt.ticketing.dto.SuccessDto;
+import hr.riteh.rwt.ticketing.dto.*;
 import hr.riteh.rwt.ticketing.service.TicketService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +44,11 @@ public class TicketController {
     @PostMapping(value = {"/get-all", "/get-all/", "/get-all/{pageNumber}"}, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> getAll (HttpServletRequest httpServletRequest, @PathVariable(required = false) Integer pageNumber, @RequestBody GetAllTicketsRequestDto requestDto) {
         return ticketService.getAll(httpServletRequest, requestDto, pageNumber == null ? 1 : pageNumber);
+    }
+
+    @PostMapping(value = "/change-status", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<SuccessDto> changeStatus (HttpServletRequest httpServletRequest, @RequestBody ChangeStatusDto requestDto) {
+        return ticketService.changeStatus(httpServletRequest, requestDto);
     }
 
 }

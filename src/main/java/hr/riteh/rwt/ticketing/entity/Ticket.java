@@ -189,4 +189,13 @@ public class Ticket {
     public void setRealFixTime(Time realFixTime) {
         this.realFixTime = realFixTime;
     }
+
+
+
+    public void makeChange(String updatedBy) {
+        this.parentID = this.id;
+        this.id++;
+        this.updatedBy = updatedBy;
+        this.updatedAt = LocalDateTime.now();
+    }
 }

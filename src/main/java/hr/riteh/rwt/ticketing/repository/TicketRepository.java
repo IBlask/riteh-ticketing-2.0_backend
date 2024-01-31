@@ -18,6 +18,9 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     Optional<TicketIdDao> findTopByOrderByIdDesc();
 
+    @Query(value = "SELECT id FROM Ticket WHERE parent_id = :parentID", nativeQuery = true)
+    Optional<Long> findChild(long parentID);
+
 
 
 
