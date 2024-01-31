@@ -106,6 +106,8 @@ public class TicketService {
                 Optional<TicketIdDao> lastTicketID = ticketRepository.findTopByOrderByIdDesc();
                 long newTicketID = lastTicketID.map(ticket -> ticket.getId() + 1).orElse(1L);
 
+                Files.createDirectories(Paths.get(ticketsPhotosPath));
+
                 byte[] bytes = ticketImage.getBytes();
                 Path path = Paths.get(ticketsPhotosPath + newTicketID + ".jpg");
                 Files.write(path, bytes);
