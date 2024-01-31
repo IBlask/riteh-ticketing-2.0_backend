@@ -190,6 +190,10 @@ public class Ticket {
         this.realFixTime = realFixTime;
     }
 
+    public void setVisibility(boolean visible) {
+        this.visible = visible;
+    }
+
 
 
     public void makeChange(String updatedBy) {

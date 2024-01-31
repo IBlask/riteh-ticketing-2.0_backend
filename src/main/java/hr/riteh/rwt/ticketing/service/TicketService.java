@@ -488,4 +488,70 @@ public class TicketService {
         successDto.setSuccessTrue();
         return ResponseEntity.ok(successDto);
     }
+
+
+
+
+
+    public ResponseEntity<SuccessDto> deleteTicket(HttpServletRequest httpServletRequest, Long ticketID) {
+        String userID = jwtUtil.resolveClaims(jwtUtil.resolveToken(httpServletRequest)).getSubject();
+        SuccessDto successDto = new SuccessDto();
+
+        //verify DTO
+        if (ticketID == null) {
+            successDto.setSuccessFalse("Niste odabrali ticket!");
+            return ResponseEntity.badRequest().body(successDto);
+        }
+
+        //verify if user is obligated to delete a ticket
+        Optional<Employee> employee = employeeRepository.findById(userID);
+        Optional<Ticket> ticket = ticketRepository.findById(ticketID);
+        boolean obligated = false;
+        if (employee.isPresent() && employee.get().isActive() && employee.get().getRole() == 'v') {
+            if (ticket.isEmpty()) {
+                successDto.setSuccessFalse("Ne postoji ticket s tim identifikacijskim brojem!");
+                return ResponseEntity.badRequest().body(successDto);
+            }
+            else if (employee.get().getDepartmentID() == ticket.get().getDepartmentID()) {
+                obligated = true;
+            }
+        }
+        else {
+            Optional<Integer> userInstitutionID = employeeRepository.getInstitutionIdByInstitutionLeaderUserID(userID);
+            if (userInstitutionID.isPresent()) {
+                if (ticket.isEmpty()) {
+                    successDto.setSuccessFalse("Ne postoji ticket s tim identifikacijskim brojem!");
+                    return ResponseEntity.badRequest().body(successDto);
+                }
+                else if (userInstitutionID.get() == ticket.get().getInstitutionID()) {
+                    obligated = true;
+                }
+            }
+        }
+
+        if (!obligated) {
+            successDto.setSuccessFalse("Nemate ovlast obrisati taj ticket!");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(successDto);
+        }
+
+        Optional<Long> childTicketID = ticketRepository.findChild(ticketID);
+        while(childTicketID.isPresent()) {
+            ticketID = childTicketID.get();
+            childTicketID = ticketRepository.findChild(ticketID);
+        }
+        ticket = ticketRepository.findById(ticketID);
+        while (ticket.isPresent() && ticket.get().getParentID() != null) {
+            ticket.get().setVisibility(false);
+            ticketRepository.save(ticket.get());
+            ticket = ticketRepository.findById(ticket.get().getParentID());
+        }
+        if (ticket.isPresent()) {
+            ticket.get().setVisibility(false);
+            ticketRepository.save(ticket.get());
+        }
+
+
+        successDto.setSuccessTrue();
+        return ResponseEntity.ok(successDto);
+    }
 }

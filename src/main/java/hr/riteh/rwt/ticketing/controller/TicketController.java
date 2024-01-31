@@ -51,4 +51,9 @@ public class TicketController {
         return ticketService.changeStatus(httpServletRequest, requestDto);
     }
 
+    @DeleteMapping(value = {"/delete", "/delete/", "/delete/{ticketID}"}, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<SuccessDto> deleteTicket (HttpServletRequest httpServletRequest, @PathVariable(required = false) Long ticketID) {
+        return ticketService.deleteTicket(httpServletRequest, ticketID);
+    }
+
 }
