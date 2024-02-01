@@ -45,5 +45,5 @@ INSERT INTO Zaposlenik_sluzbe(user_id, sluzba_id, role, active) VALUES ('vd_ts@r
 -- *****AGENTI*****
 INSERT INTO Zaposlenik_sluzbe(user_id, sluzba_id, role, active) VALUES ('ag_rc1@riteh.hr', 1, 'a', 1);
 INSERT INTO Zaposlenik_sluzbe(user_id, sluzba_id, role, active) VALUES ('ag_rc2@riteh.hr', 1, 'a', 1);
-INSERT INTO Zaposlenik_sluzbe(user_id, sluzba_id, role, active) VALUES ('ag_ts1@riteh.hr', 1, 'a', 1);
-INSERT INTO Zaposlenik_sluzbe(user_id, sluzba_id, role, active) VALUES ('ag_ts2@riteh.hr', 1, 'a', 1);
+INSERT INTO Zaposlenik_sluzbe(user_id, sluzba_id, role, active) VALUES ('ag_ts1@riteh.hr', 2, 'a', 1);
+INSERT INTO Zaposlenik_sluzbe(user_id, sluzba_id, role, active) VALUES ('ag_ts2@riteh.hr', 2, 'a', 1);
