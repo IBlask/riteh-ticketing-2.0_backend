@@ -4,6 +4,7 @@ import hr.riteh.rwt.ticketing.entity.Employee;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface EmployeeRepository extends JpaRepository<Employee, String> {
@@ -14,4 +15,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, String> {
 
     @Query(value = "SELECT institucija_id FROM Super_voditelj WHERE user_id = :userID AND active = true", nativeQuery = true)
     Optional<Integer> getInstitutionIdByInstitutionLeaderUserID(String userID);
+
+    List<Employee> findAllByDepartmentIDAndRoleAndActive(int departmentID, char role, boolean active);
 }
